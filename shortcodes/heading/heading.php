@@ -41,13 +41,6 @@ class IG_Heading extends IG_Pb_Shortcode_Element {
 		// Define exception for this shortcode
 		$this->config['exception'] = array(
 			'admin_assets' => array(
-				// Color Picker
-				'ig-pb-colorpicker-css',
-				'ig-pb-colorpicker-js',
-
-				// Font Selector
-				'ig-pb-joomlashine-fontselector-js',
-
 				// Shortcode initialization
 				'heading.js',
 			),
@@ -85,8 +78,8 @@ class IG_Heading extends IG_Pb_Shortcode_Element {
 					'id'      => 'tag',
 					'type'    => 'select',
 					'class'   => 'input-sm',
-					'std'     => 'h1',
-					'options' => array( 'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'h4' => 'H4', 'h5' => 'H5', 'h6' => 'H6' ),
+					'std'     => 'h3',
+					'options' => array( 'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'h4' => 'H4', 'h5' => 'H5', 'h6' => 'H6', 'h3_underlined' => 'H3 Underlined', 'h3_thr' => 'H3 Line Through' ),
 					'tooltip' => __( 'Support tags: H1, H2, H3, H4, H5, H6', IGPBL )
 				),
 				array(
@@ -138,7 +131,7 @@ class IG_Heading extends IG_Pb_Shortcode_Element {
 							'id'           => 'font_face_value',
 							'type'         => 'jsn_select_font_value',
 							'class'        => 'input-sm',
-							'std'          => 'Verdana',
+							'std'          => '',
 							'options'      => '',
 							'parent_class' => 'combo-item',
 						),
@@ -368,8 +361,17 @@ class IG_Heading extends IG_Pb_Shortcode_Element {
 		}
 
 		// Finalize HTML code
-		$true_element = "<{$arr_params['tag']} style='{$style}'>" . IG_Pb_Helper_Shortcode::remove_autop( $content ) . "</{$arr_params['tag']}>";
-
+		if ( ( $arr_params['tag'] != 'h3_underlined' ) && ( $arr_params['tag'] != 'h3_thr' ) ) $true_element = "<{$arr_params['tag']} style='{$style}'>" . IG_Pb_Helper_Shortcode::remove_autop( $content ) . "</{$arr_params['tag']}>";
+        elseif ( $arr_params['tag'] == 'h3_underlined') {
+            $true_element = "<h3 class=\"pt-content-title\" style='{$style}'>" . IG_Pb_Helper_Shortcode::remove_autop( $content ) . "</h3>";
+        } elseif ($arr_params['tag'] == 'h3_thr') {
+            $true_element = "<div class=\"head-wrap\">
+                                <div class=\"cell\">
+                                    <h3 class=\"pt-shortcode-title\">".add_label_to_post_title(IG_Pb_Helper_Shortcode::remove_autop( $content ))."</h3>
+                                    <div class=\"sep\"></div>
+                                    </div>
+                                </div>";
+        }
 		return $this->element_wrapper( $script . $stylesheet . $true_element, $arr_params );
 	}
 }

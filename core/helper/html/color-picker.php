@@ -23,10 +23,7 @@ class IG_Pb_Helper_Html_Color_Picker extends IG_Pb_Helper_Html {
 		$output   = '<input ' . $_hidden . " size='10' id='{$element['id']}' class='input-mini' disabled='disabled' name='{$element['id']}' value='{$element['std']}'  DATA_INFO />";
 		$output  .= "<div id='color-picker-{$element['id']}' class='color-selector'><div style='background-color: {$bg_color}'></div></div>";
 
-		//$output = "<input class='{$element['class']} ig_color_picker' id='{$element['id']}' name='{$element['id']}' type='text' value='{$element['std']}'  DATA_INFO />
-		//<div class='cw-color-picker ig_color_picker_cw' rel='{$element['id']}'></div>";
-
-		add_filter( 'ig_pb_assets_enqueue_modal', array( __CLASS__, 'enqueue_assets_modal' ) );
+		add_filter( 'ig-edit-element-required-assets', array( __CLASS__, 'enqueue_assets_modal' ), 9 );
 
 		return parent::final_element( $element, $output, $label );
 	}

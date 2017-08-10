@@ -13,28 +13,20 @@ if ( ! class_exists( 'IG_Pb_Objects_Widget' ) ) {
 
 	class IG_Pb_Objects_Widget extends WP_Widget {
 
-		var $ig_widget_cssclass;
-		var $ig_widget_description;
-		var $ig_widget_idbase;
-		var $ig_widget_name;
-
 		/**
 		 * constructor
 		 *
 		 * @access public
 		 * @return void
 		 */
-		function IG_Pb_Objects_Widget() {
-			$this->ig_widget_cssclass    = 'ig-widget-pagebuilder';
-			$this->ig_widget_description = __( 'Presentation of any PageBuilder element', IGPBL );
-			$this->ig_widget_idbase      = 'ig_widget_pagebuilder';
-			$this->ig_widget_name        = __( 'PageBuilder Element', IGPBL );
-
-			/* Widget settings. */
-			$widget_ops = array( 'classname' => $this->ig_widget_cssclass, 'description' => $this->ig_widget_description );
-
-			/* Create the widget. */
-			$this->WP_Widget( 'ig_widget_pagebuilder', $this->ig_widget_name, $widget_ops );
+		public function __construct() {
+			parent::__construct(
+		 		'ig_widget_pagebuilder', // Base ID
+				__( 'PageBuilder Element', IGPBL ), // Name
+				array('description' => __( 'Presentation of any PageBuilder element', IGPBL ),
+					  'classname' => 'ig-widget-pagebuilder',
+				)
+			);
 		}
 
 		/**
@@ -161,7 +153,6 @@ if ( ! class_exists( 'IG_Pb_Objects_Widget' ) ) {
 							<div class="jsn-section-content jsn-style-light hidden" id="form-design-content">
 								<div class="ig-pb-form-container jsn-layout">
 									<input type="hidden" id="ig-select-media" value="" />
-									<input type="hidden" id="ig-tinymce-change" value="0" />
 								</div>
 							</div>
 						</div>

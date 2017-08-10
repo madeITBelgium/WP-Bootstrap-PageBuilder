@@ -26,7 +26,7 @@ class IG_Pb_Helper_Html_Tiny_Mce extends IG_Pb_Helper_Html {
 		$output = "<textarea class='{$element['class']} ig_pb_tiny_mce' id='{$element['id']}' rows='{$element['row']}' cols='{$element['col']}' name='{$element['id']}' DATA_INFO>{$element['std']}</textarea>";
 
 		add_filter( 'ig_pb_assets_register_modal', array( __CLASS__, 'register_assets_register_modal' ) );
-		add_filter( 'ig_pb_assets_enqueue_modal', array( __CLASS__, 'enqueue_assets_modal' ) );
+		add_filter( 'ig-edit-element-required-assets', array( __CLASS__, 'enqueue_assets_modal' ), 9 );
 
 		return parent::final_element( $element, $output, $label, true );
 	}

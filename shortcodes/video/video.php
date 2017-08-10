@@ -45,10 +45,6 @@ class IG_Video extends IG_Pb_Shortcode_Element {
 		// Define exception for this shortcode
 		$this->config['exception'] = array(
 			'admin_assets' => array(
-				// Color Picker
-				'ig-pb-colorpicker-css',
-				'ig-pb-colorpicker-js',
-
 				// Shortcode initialization
 				'video.js',
 			),
@@ -249,6 +245,42 @@ class IG_Video extends IG_Pb_Shortcode_Element {
 						'0' => __( 'No', IGPBL )
 					),
 					'tooltip' => __( 'Whether to repeat playing or not', IGPBL ),
+				),
+				array(
+					'name'       => __( 'Show YouTube Logo', IGPBL ),
+					'id'         => 'video_youtube_modestbranding',
+					'type'       => 'radio',
+					'std'        => '1',
+					'dependency' => array( 'video_sources', '=', 'youtube' ),
+					'options'    => array(
+						'0' => __( 'Yes', IGPBL ),
+						'1' => __( 'No', IGPBL )
+					),
+					'tooltip'    => __( 'This parameter lets you use a YouTube player that show a YouTube logo.', IGPBL ),
+				),
+				array(
+					'name'       => __( 'Show Related Video', IGPBL ),
+					'id'         => 'video_youtube_rel',
+					'type'       => 'radio',
+					'std'        => '1',
+					'dependency' => array( 'video_sources', '=', 'youtube' ),
+					'options'    => array(
+						'1' => __( 'Yes', IGPBL ),
+						'0' => __( 'No', IGPBL )
+					),
+					'tooltip'    => __( 'This parameter indicates whether the player should show related videos when playback of the initial video ends.', IGPBL ),
+				),
+				array(
+					'name'       => __( 'Show Information', IGPBL ),
+					'id'         => 'video_youtube_showinfo',
+					'type'       => 'radio',
+					'std'        => '1',
+					'dependency' => array( 'video_sources', '=', 'youtube' ),
+					'options'    => array(
+						'1' => __( 'Yes', IGPBL ),
+						'0' => __( 'No', IGPBL )
+					),
+					'tooltip'    => __( 'This parameter allow your player display information like the video title and uploader before the video starts playing.', IGPBL ),
 				),
 				array(
 					'name'       => __( 'Controls Auto Hide', IGPBL ),
@@ -519,7 +551,6 @@ new MediaElementPlayer("#' . $random_id . '",
 		$container_style .= (isset($params['video_margin_bottom']) && $params['video_margin_bottom'] != '') ? 'margin-bottom:' . $params['video_margin_bottom'] . 'px;' : '';
 		$container_style = $container_style ? ' style=" ' . $container_style . ' " ' : '';
 
-
 		$params['video_source_link_youtube'] = urldecode( $params['video_source_link_youtube'] );
 		// Get video ID.
 		$video_info = $this->get_youtube_video_info( $params['video_source_link_youtube'] );
@@ -558,13 +589,15 @@ new MediaElementPlayer("#' . $random_id . '",
 			$video_src .= isset($params['video_youtube_controls']) ? '&controls=' . (int) $params['video_youtube_controls'] : '';
 			$video_src .= isset($params['video_youtube_loop']) ? '&loop=' . (int) $params['video_youtube_loop'] : '';
 			$video_src .= (isset($params['video_youtube_cc']) && (int) $params['video_youtube_cc'] == 1) ? '&cc_load_policy =1' : '';
+			$video_src .= isset( $params['video_youtube_modestbranding'] ) ? '&modestbranding=' . (int) $params['video_youtube_modestbranding'] : '';
+			$video_src .= isset( $params['video_youtube_rel'] ) ? '&rel=' . (int) $params['video_youtube_rel'] : '';
+			$video_src .= isset( $params['video_youtube_showinfo'] ) ? '&showinfo=' . (int) $params['video_youtube_showinfo'] : '';
 		}
 
 		$embed = '<div ' . $container_class . $container_style . '>';
 		$embed .= '<iframe style="display:block;' . $object_style . '" ' . $_w . $_h . '
 src="' . $video_src . '" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
 		$embed .= '</div>';
-
 
 		return $embed;
 	}

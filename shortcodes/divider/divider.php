@@ -41,11 +41,6 @@ class IG_Divider extends IG_Pb_Shortcode_Element {
 
 		// Define exception for this shortcode
 		$this->config['exception'] = array(
-			'admin_assets' => array(
-				// Color Picker
-				'ig-pb-colorpicker-css',
-				'ig-pb-colorpicker-js',
-			),
 
 			'frontend_assets' => array(
 				// Bootstrap 3
@@ -76,9 +71,21 @@ class IG_Divider extends IG_Pb_Shortcode_Element {
 				),
 			),
 			'styling' => array(
-				array(
+				/*array(
 					'type' => 'preview',
+				),*/
+
+				array(
+					'name'            => __( 'Margin', IGPBL ),
+					'container_class' => 'combo-group',
+					'id'              => 'divider_margin',
+					'type'            => 'margin',
+					'extended_ids'    => array( 'divider_margin_top', 'divider_margin_bottom' ),
+						'image_margin_top'    => array( 'std' => '10' ),
+						'image_margin_bottom' => array( 'std' => '10' ),
+						'tooltip'             => __( 'Set margin size', IGPBL )
 				),
+
 				array(
 					'name' => __( 'Border', IGPBL ),
 					'type' => array(
@@ -135,11 +142,11 @@ class IG_Divider extends IG_Pb_Shortcode_Element {
 		if ( $div_border_color ) {
 			$styles[] = 'border-bottom-color:' . urldecode( $div_border_color );
 		}
-		if ( $div_margin_top ) {
-			$styles[] = 'margin-top:' . intval( $div_margin_top ) . 'px';
+		if ( $divider_margin_top ) {
+			$styles[] = 'margin-top:' . intval( $divider_margin_top ) . 'px';
 		}
-		if ( $div_margin_bottom ) {
-			$styles[] = 'margin-bottom:' . intval( $div_margin_bottom ) . 'px';
+		if ( $divider_margin_bottom ) {
+			$styles[] = 'margin-bottom:' . intval( $divider_margin_bottom ) . 'px';
 		}
 		if ( count( $styles ) > 0 ) {
 			$html_element = '<div style="' . implode( ';', $styles ) . '"></div>';

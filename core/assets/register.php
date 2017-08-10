@@ -124,7 +124,7 @@ class IG_Pb_Assets_Register {
 			'src' => 'assets/3rd-party/jquery-select2/select2.css',
 			'ver' => '3.3.2',
 		),
-		
+
 		'ig-pb-jquery-select2-bootstrap3-css' => array(
 			'src' => 'assets/3rd-party/jquery-select2/select2-bootstrap3.css',
 			'ver' => '3.3.2',
@@ -144,6 +144,14 @@ class IG_Pb_Assets_Register {
 		'ig-zeroclipboard-js' => array(
 			'src' => 'assets/3rd-party/zeroclipboard/ZeroClipboard.min.js',
 			'ver' => '1.3.5',
+		),
+
+		'ig-pb-convert-data-js' => array(
+			'src' => 'assets/innogears/js/convert-data.js',
+		),
+
+		'ig-pb-activity-js' => array(
+			'src' => 'assets/innogears/js/activity.js',
 		),
 	);
 

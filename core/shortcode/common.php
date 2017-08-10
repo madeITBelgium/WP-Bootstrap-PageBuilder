@@ -30,7 +30,31 @@ class IG_Pb_Shortcode_Common {
 	public $items;
 
 	public function __construct() {
-		
+		// Register required assets
+		add_filter( 'ig-edit-element-required-assets', array( &$this, 'required_assets' ) );
+	}
+
+	/**
+	 * Define required assets for shortcode settings form.
+	 *
+	 * @param   array  $assets  Current required assets.
+	 *
+	 * @return  array
+	 */
+	public function required_assets( $assets ) {
+		if ( ! isset( $_GET['ig_shortcode_preview'] ) || ! $_GET['ig_shortcode_preview'] ) {
+			// Register admin assets if required
+			if ( @is_array( $this->config['exception'] ) && isset( $this->config['exception']['admin_assets'] ) ) {
+				$assets[] = $this->config['exception']['admin_assets'];
+			}
+		} else {
+			// Register front-end assets if required
+			if ( @is_array( $this->config['exception'] ) && isset( $this->config['exception']['frontend_assets'] ) ) {
+				$assets[] = $this->config['exception']['frontend_assets'];
+			}
+		}
+
+		return $assets;
 	}
 
 	/*
@@ -38,7 +62,7 @@ class IG_Pb_Shortcode_Common {
 	 */
 
 	public function element_button( $sort ) {
-		
+
 	}
 
 	/*
@@ -46,7 +70,11 @@ class IG_Pb_Shortcode_Common {
 	 */
 
 	public function element_in_pgbldr() {
-		
+
+	}
+	
+	public function init_element() {
+	
 	}
 
 }

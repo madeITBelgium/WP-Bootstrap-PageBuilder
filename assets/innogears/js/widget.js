@@ -36,9 +36,8 @@
 					var html_preview = Ig_Preview_Html;
 					html_preview = html_preview.replace(/IG_SHORTCODE_CONTENT/g, shortcode);
 					html_preview = html_preview.replace(/IG_SHORTCODE_DATA/g, shortcode_data);
-					
+
 					html += '<input id="ig-select-media" type="hidden" value="">';
-					html += '<input id="ig-tinymce-change" type="hidden" value="0">';
 					html += html_preview;
 					html += '<div class="shortcode-preview-container" style="display: none">';
 					html += '<div class="shortcode-preview-fog"></div>';
@@ -58,14 +57,14 @@
 			var selected = $(this).val();
 			if ( selected ) {
 				$(this).closest('.widget-content').find('#ig_widget_edit_btn').attr('data-shortcode', selected);
-				$(this).closest('.widget-content').find('.ig-pb-form-container').html('<input type="hidden" id="ig-select-media" value="" /><input type="hidden" id="ig-tinymce-change" value="0" />');
+				$(this).closest('.widget-content').find('.ig-pb-form-container').html('<input type="hidden" id="ig-select-media" value="" />');
 			}
 		});
 		$('body').delegate('.ig_widget_select_elm', 'change', function (e) {
 			var selected = $(this).val();
 			if ( selected ) {
 				$(this).closest('.widget-content').find('#ig_widget_edit_btn').attr('data-shortcode', selected);
-				$(this).closest('.widget-content').find('.ig-pb-form-container').html('<input type="hidden" id="ig-select-media" value="" /><input type="hidden" id="ig-tinymce-change" value="0" />');
+				$(this).closest('.widget-content').find('.ig-pb-form-container').html('<input type="hidden" id="ig-select-media" value="" />');
 			}
 			$(this).closest('.widget-content').find('.ig_shortcode_widget').attr('value', '');
 		});

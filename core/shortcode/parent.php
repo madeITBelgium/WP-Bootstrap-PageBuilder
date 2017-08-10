@@ -39,7 +39,7 @@ class IG_Pb_Shortcode_Parent extends IG_Pb_Shortcode_Element {
 			foreach ( $sub_shortcodes as $sub_shortcode ) {
 
 				$sub_sc = new $sub_item_type();
-
+				$sub_sc->init_element();
 				// empty std
 				if ( empty( $sub_shortcode['std'] ) ) {
 

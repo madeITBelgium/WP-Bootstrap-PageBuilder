@@ -149,6 +149,8 @@ class IG_Pb_Addon {
 		$shortcode_dir    = empty ( $provider['shortcode_dir'] ) ? 'shortcodes' : $provider['shortcode_dir'];
 		$js_shortcode_dir = empty ( $provider['js_shortcode_dir'] ) ? 'assets/js/shortcodes' : $provider['js_shortcode_dir'];
 
+
+
 		// Check if path is absolute
 		if ( ! is_dir( $shortcode_dir ) ) {
 			$shortcode_dir = $path . $shortcode_dir;
@@ -168,6 +170,7 @@ class IG_Pb_Addon {
 			'shortcode_dir'    => $shortcode_dir,
 			'js_shortcode_dir' => array( 'path' => $path . $js_shortcode_dir, 'uri' => $uri . $js_shortcode_dir ),
 		);
+
 
 		return $providers;
 	}

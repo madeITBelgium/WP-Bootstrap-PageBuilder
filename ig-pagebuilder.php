@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: IG PageBuilder
+ * Plugin Name: IG PageBuilder PT MOD
  * Plugin URI:  http://www.innogears.com
  * Description: Awesome content builder for Wordpress websites
- * Version:     2.2.1
+ * Version:     1.0
  * Author:      InnoGears Team <support@www.innogears.com>
  * Author URI:  http://www.innogears.com
  * License:     GNU/GPL v2 or later http://www.gnu.org/licenses/gpl-2.0.html
@@ -45,9 +45,17 @@ class IG_Pb_Init {
 		add_action( 'widgets_init', array(                 &$this, 'init'          ), 100 );
 		add_action( 'admin_init'  , array(       'IG_Gadget_Base', 'hook'          ), 100 );
 		add_action( 'admin_init'  , array( 'IG_Pb_Product_Plugin', 'settings_form' )      );
+		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_styles_scripts' ), 20 );
+
 
 		// Initialize built-in shortcodes
 		include dirname( __FILE__ ) . '/shortcodes/main.php';
+	}
+
+	public function enqueue_styles_scripts() {
+
+		wp_enqueue_style ( 'wp-jquery-ui-dialog' );
+
 	}
 
 	/**
@@ -60,7 +68,9 @@ class IG_Pb_Init {
 
 		// Initialize IG PageBuilder
 		$Ig_Pb = new IG_Pb_Core();
-		$IG_Pb_Utils_Plugin = new IG_Pb_Utils_Plugin();
+		new IG_Pb_Utils_Plugin();
+		remove_filter( 'the_content', 'wpautop' );
+		do_action( 'ig_pagebuilder_init' );
 
 		// Initialize productivity functions
 		IG_Pb_Product_Plugin::init();
@@ -78,7 +88,6 @@ class IG_Pb_Init {
 		// include core files
 		include_once 'core/loader.php';
 		include_once 'defines.php';
-		include_once 'core/support.php';
 	}
 
 	/**

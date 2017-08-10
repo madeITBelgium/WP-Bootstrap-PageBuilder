@@ -46,10 +46,6 @@ class IG_Audio extends IG_Pb_Shortcode_Element {
 		// Define exception for this shortcode
 		$this->config['exception'] = array(
 			'admin_assets' => array(
-				// Color Picker
-				'ig-pb-colorpicker-css',
-				'ig-pb-colorpicker-js',
-
 				// Shortcode initialization
 				'audio.js',
 			),
@@ -433,6 +429,7 @@ class IG_Audio extends IG_Pb_Shortcode_Element {
 			$container_class .= 'clearafter pull-left';
 		}
 		// Genarate Container class
+		$container_class .= ' ig-' . $random_id . ' ' . $container_class;
 		$container_class = $container_class ? ' class="' . $container_class . '" ' : '';
 
 		$player_options .= 'success: function( mediaElement, domObject ){
@@ -451,6 +448,12 @@ class IG_Audio extends IG_Pb_Shortcode_Element {
 				);
 			});
 		</script>';
+		$fixed_css = '';
+		if ( isset( $params['audio_local_dimension_height'] ) && $params['audio_local_dimension_height'] != '' ) {
+			$fixed_css = "<style type='text/css'>.jsn-bootstrap3 .ig-element-audio .ig-{$random_id} .mejs-container {
+	min-height: {$params['audio_local_dimension_height']}px; 
+}</style>";
+		}
 		
 		$container_style .= ( isset( $params['audio_margin_left'] ) && $params['audio_margin_left'] != '' ) ? 'margin-left:' . $params['audio_margin_left'] . 'px;' : '';
 		$container_style .= ( isset( $params['audio_margin_top'] ) && $params['audio_margin_top'] != '' ) ? 'margin-top:' . $params['audio_margin_top'] . 'px;' : '';
@@ -465,7 +468,7 @@ class IG_Audio extends IG_Pb_Shortcode_Element {
 		$type = wp_check_filetype( $src );
 		$source = sprintf( $source, $type['type'], esc_url( $src ) );
 
-		return $script . '<div ' . $container_class . $container_style . '>
+		return $fixed_css . $script . '<div ' . $container_class . $container_style . '>
 								<audio controls="controls" preload="none" ' . $audio_size['width'] . $audio_size['height'] . ' id="' . $random_id . '" src="' . $src . '" >
 									' . $source . '
 								</audio>

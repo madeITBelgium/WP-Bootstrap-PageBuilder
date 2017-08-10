@@ -22,7 +22,7 @@ class IG_Pb_Helper_Html_Tag extends IG_Pb_Helper_Html {
 		$element['class'] = ( $element['class'] ) ? $element['class'] . ' select2' : 'select2';
 		$output = "<input type='hidden' value='{$element['std']}' id='{$element['id']}' class='{$element['class']}' data-share='ig_share_data' DATA_INFO />";
 
-		add_filter( 'ig_pb_assets_enqueue_modal', array( __CLASS__, 'enqueue_assets_modal' ) );
+		add_filter( 'ig-edit-element-required-assets', array( __CLASS__, 'enqueue_assets_modal' ), 9 );
 
 		return parent::final_element( $element, $output, $label );
 	}

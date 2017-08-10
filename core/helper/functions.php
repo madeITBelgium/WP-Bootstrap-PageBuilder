@@ -81,8 +81,8 @@ if ( ! class_exists( 'IG_Pb_Helper_Functions' ) ) {
 					'delete_layout_fail'    => __( 'Fail. Can\'t delete layout', IGPBL ),
 					'delete_group'          => __( 'All pages in this group will be remove. Do you want to continue ?', IGPBL ),
 					'delete_layout'         => __( 'This page will be remove. Do you want to continue ?', IGPBL ),
-					'no_layout_name'        => __( 'Template name can not be null' ),
-					'name_exist'            => __( 'Template name exists. Please choose another one.' ),
+					'no_layout_name'        => __( 'Template name can not be null', IGPBL ),
+					'name_exist'            => __( 'Template name exists. Please choose another one.', IGPBL )
 				),
 				'custom_css'            => array(
 					'modal_title'    => __( 'Custom CSS', IGPBL ),
@@ -147,6 +147,9 @@ if ( ! class_exists( 'IG_Pb_Helper_Functions' ) ) {
 								$sc_uri  = $plugin_uri;
 							}
 						}
+
+
+
 
 						$ext_regex = '/(_frontend)*\.(js|css)$/';
 						if ( preg_match( $ext_regex, $asset ) ) {
@@ -467,6 +470,26 @@ if ( ! class_exists( 'IG_Pb_Helper_Functions' ) ) {
 		static function ig_arr_walk_subsc( &$value, $key, $new_values ) {
 			$value['std'] = $new_values[$key];
 		}
+
+
+
+        public static function get_image_sizes() {
+
+            $image_sizes = get_intermediate_image_sizes();
+
+            $size_option = array();
+
+            foreach ( $image_sizes as $size ){
+
+                $size_option[$size] = $size;
+
+            }
+
+            return $size_option;
+
+        }
+
+
 
 		/**
 		 * Get image id
@@ -804,10 +827,12 @@ if ( ! class_exists( 'IG_Pb_Helper_Functions' ) ) {
 		 * Get html item
 		 *
 		 * @param array $data
+		 * @param bool $inlude_sc_structure print the data structure in
+		 * a textarea or not
 		 *
 		 * @return string
 		 */
-		static function get_element_item_html( $data ) {
+		static function get_element_item_html( $data, $inlude_sc_structure = true ) {
 			$default = array(
 				'element_wrapper'       => '',
 				'modal_title'           => '',
@@ -820,6 +845,7 @@ if ( ! class_exists( 'IG_Pb_Helper_Functions' ) ) {
 				'action_btn'            => '',
 				'has_preview'           => true,
 				'this_'                 => '',
+				'drag_handle'           => true,
 			);
 			$data = array_merge( $default, $data );
 			extract( $data );
@@ -836,9 +862,11 @@ if ( ! class_exists( 'IG_Pb_Helper_Functions' ) ) {
 			$custom_style = IG_Pb_Utils_Placeholder::get_placeholder( 'custom_style' );
 			$other_class  = '';
 
-			if ( ! empty( $this_ ) ) {
-				$match = preg_match( "/\[$shortcode" . '\s' . '([^\]])*' . 'disabled_el="yes"' . '([^\]])*' . '\]/', $shortcode_data );
-				if ( $match ) {
+			// Check if this element is deactivate
+			preg_match_all( '/\[' . $shortcode . '\s+([A-Za-z0-9_-]+=\"[^"\']*\"\s*)*\s*\]/', $shortcode_data, $rg_sc_params );
+			if ( ! empty( $rg_sc_params[0] ) ) {
+				$sc_name_params = ! empty( $rg_sc_params[0][0] ) ? $rg_sc_params[0][0] : $rg_sc_params[0];
+				if( strpos( $sc_name_params , 'disabled_el="yes"') !== false ) {
 					$other_class = 'disabled';
 				}
 			}
@@ -870,7 +898,16 @@ if ( ! class_exists( 'IG_Pb_Helper_Functions' ) ) {
 			$action_btns = ( empty( $action_btn ) ) ? implode( '', $buttons ) : $buttons[$action_btn];
 			$buttons     = apply_filters( 'ig_pb_button_in_pagebuilder', "<div class='jsn-iconbar'>$action_btns</div>", $shortcode_data, $shortcode );
 
-			return "<$element_wrapper class='jsn-item jsn-element ui-state-default jsn-iconbar-trigger shortcode-container $extra_class $other_class' $modal_title $element_type data-name='$name' $custom_style>
+			// Exclude the shortcode structure in shortcode textarea if not required.
+			if ( !$inlude_sc_structure ) {
+				$shortcode_data   = '';
+			}
+
+			// Add drag handle
+			$drag_handle_html = ( $drag_handle == true ) ? "<a class='element-drag'></a>" : "";
+
+			return "<$element_wrapper class='jsn-item jsn-element ui-state-default jsn-iconbar-trigger shortcode-container $extra_class $other_class' $modal_title $element_type $edit_using_ajax data-name='$name' $custom_style>
+				$drag_handle_html
 				<textarea class='hidden shortcode-content' shortcode-name='$shortcode' data-sc-info='shortcode_content' name='shortcode_content[]' >$shortcode_data</textarea>
 				<div class='$content_class'>$content</div>
                 $buttons

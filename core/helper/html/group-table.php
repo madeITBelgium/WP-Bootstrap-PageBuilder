@@ -29,10 +29,15 @@ class IG_Pb_Helper_Html_Group_Table extends IG_Pb_Helper_Html {
 
 		// get id of parameter to extract
 		$extract_title = isset ( $element['extract_title'] ) ? $element['extract_title'] : '';
+		
+		$extra_params = array(
+			'drag_handle' => false
+		);
 
 		if ( $sub_items ) {
 			foreach ( $sub_items as $idx => $item ) {
-				$element = new $sub_item_type();
+				$el = new $sub_item_type();
+				$el->init_element();
 				// check if $item['std'] is empty or not
 				$shortcode_data = '';
 				if ( ! $label_item ) {
@@ -49,16 +54,16 @@ class IG_Pb_Helper_Html_Group_Table extends IG_Pb_Helper_Html {
 					$shortcode_data = $item['std'];
 					// reassign params for shortcode base on std string
 					$extract_params = IG_Pb_Helper_Shortcode::extract_params( ( $item['std'] ) );
-					$params         = IG_Pb_Helper_Shortcode::generate_shortcode_params( $element->items, NULL, $extract_params, TRUE, FALSE, $content );
-					$element->shortcode_data();
+					$params         = IG_Pb_Helper_Shortcode::generate_shortcode_params( $el->items, NULL, $extract_params, TRUE, FALSE, $content );
+					$el->shortcode_data();
 					$params['extract_title'] = empty ( $params['extract_title'] ) ? __( '(Untitled)', IGPBL ) : $params['extract_title'];
 					$content                 = $params['extract_title'];
 					if ( $overwrite_shortcode_data ) {
-						$shortcode_data = $element->config['shortcode_structure'];
+						$shortcode_data = $el->config['shortcode_structure'];
 					}
 				}
 
-				$element_type = (array) $element->element_in_pgbldr( $content, $shortcode_data );
+				$element_type = (array) $el->element_in_pgbldr( $content, $shortcode_data, '', '', true, $extra_params );
 				foreach ( $element_type as $element_structure ) {
 					$items_html[$shortcode_data] = $element_structure;
 				}

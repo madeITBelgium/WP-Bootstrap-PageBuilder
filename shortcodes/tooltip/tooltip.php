@@ -42,11 +42,6 @@ class IG_Tooltip extends IG_Pb_Shortcode_Element {
 
 		// Define exception for this shortcode
 		$this->config['exception'] = array(
-			'admin_assets' => array(
-				// jQuery Text Editor
-				'ig-pb-jquery-te-css',
-				'ig-pb-jquery-te-js',
-			),
 
 			'frontend_assets' => array(
 				// Bootstrap 3

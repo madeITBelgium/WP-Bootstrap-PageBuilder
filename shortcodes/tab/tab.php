@@ -56,8 +56,8 @@ class IG_Tab extends IG_Pb_Shortcode_Parent {
 			),
 		);
 
-		// Do not use Ajax to load element settings modal because this element has sub-item
-		$this->config['edit_using_ajax'] = false;
+		// Use Ajax to speed up element settings modal loading speed
+		$this->config['edit_using_ajax'] = true;
 	}
 
 	/**

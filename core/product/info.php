@@ -307,6 +307,8 @@ class IG_Product_Info {
 	 * @return  array
 	 */
 	protected static function info() {
+		global $pagenow;
+
 		// Get WordPress's WordPress Filesystem Abstraction object
 		$wp_filesystem = IG_Init_File_System::get_instance();
 
@@ -336,6 +338,10 @@ class IG_Product_Info {
 
 			// Check if we need to get product info from InnoGears.com server
 			$refresh = false;
+
+			if ( 'admin.php' == $pagenow && isset( $_GET['page'] ) && preg_match( '/^ig-.+-addons$/', $_GET['page'] ) ) {
+				$refresh = true;
+			}
 
 			if ( ! $wp_filesystem->is_file( $path ) || self::$cache_time < ( time() - $wp_filesystem->mtime( $path ) ) ) {
 				$refresh = true;

@@ -236,7 +236,7 @@ class IG_Image extends IG_Pb_Shortcode_Element {
 			$image_id       = IG_Pb_Helper_Functions::get_image_id( $image_file );
 			$attachment     = wp_prepare_attachment_for_js( $image_id );
 			$image_file     = ( ! empty( $attachment['sizes'][$image_size]['url'] ) ) ? $attachment['sizes'][$image_size]['url'] : $image_file;
-			$html_elemments .= "<img src='{$image_file}'{$alt_text}{$styles}{$class_img} />";
+			$html_elemments .= "<img src='{$image_file}'{$alt_text}{$styles}{$class_img} alt=''/>";
 			$script         = '';
 			$target         = '';
 

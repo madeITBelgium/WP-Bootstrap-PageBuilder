@@ -85,7 +85,7 @@ if ( empty ( $elements ) || empty ( $elements['element'] ) ) {
 								</select>
 							</div>
 							<div class="pull-right jsn-quick-search" role="search">
-								<input type="text" class="input form-control" id="jsn-quicksearch-field" placeholder="<?php _e( 'Search', IGPBL ); ?>...">
+								<input type="text" class="input form-control jsn-quicksearch-field" placeholder="<?php _e( 'Search', IGPBL ); ?>...">
 								<a href="javascript:void(0);" title="<?php _e( 'Clear Search', IGPBL ); ?>" class="jsn-reset-search" id="reset-search-btn"><i class="icon-remove"></i></a>
 							</div>
 						</fieldset>
@@ -110,7 +110,7 @@ if ( empty ( $elements ) || empty ( $elements['element'] ) ) {
 						<li class="jsn-item full-width" data-value='raw' data-sort='shortcode'>
 							<textarea id="raw_shortcode"></textarea>
 
-							<div class="text-center">
+							<div class="text-center rawshortcode-container">
 								<button class="shortcode-item btn btn-success" data-shortcode="raw" id="rawshortcode-add"><?php _e( 'Add Element', IGPBL ); ?></button>
 							</div>
 						</li>
@@ -119,20 +119,6 @@ if ( empty ( $elements ) || empty ( $elements['element'] ) ) {
 					</p>
 				</div>
 			</div>
-		</div>
-	</div>
-
-	<!-- Use for Popup modal in Classic Editor, when click on Inno icon -->
-	<div id="ig-shortcodes" class="ig-add-element add-field-dialog jsn-bootstrap3" style="display: none;">
-		<div class="jsn-elementselector">
-			<ul class="jsn-items-list">
-	<?php
-	// shortcode elements
-	foreach ( $elements_html as $idx => $element ) {
-		echo balanceTags( $element );
-	}
-	?>
-			</ul>
 		</div>
 	</div>
 

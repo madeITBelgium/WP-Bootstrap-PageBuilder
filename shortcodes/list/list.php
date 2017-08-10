@@ -43,13 +43,6 @@ class IG_List extends IG_Pb_Shortcode_Parent {
 		// Define exception for this shortcode
 		$this->config['exception'] = array(
 			'admin_assets' => array(
-				// Color Picker
-				'ig-pb-colorpicker-css',
-				'ig-pb-colorpicker-js',
-
-				// Font Selector
-				'ig-pb-joomlashine-fontselector-js',
-
 				// Shortcode initialization
 				'list.js',
 			),
@@ -67,8 +60,8 @@ class IG_List extends IG_Pb_Shortcode_Parent {
 			),
 		);
 
-		// Do not use Ajax to load element settings modal because this element has sub-item
-		$this->config['edit_using_ajax'] = false;
+		// Use Ajax to speed up element settings modal loading speed
+		$this->config['edit_using_ajax'] = true;
 	}
 
 	/**
@@ -169,7 +162,7 @@ class IG_List extends IG_Pb_Shortcode_Parent {
 						array(
 							'id'           => 'icon_background_color',
 							'type'         => 'color_picker',
-							'std'          => '#0088CC',
+							'std'          => 'none',
 							'parent_class' => 'combo-item',
 						),
 					),

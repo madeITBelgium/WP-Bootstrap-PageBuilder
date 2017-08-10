@@ -44,28 +44,55 @@ iframe, object, video {
 }
 
 /* === social icons === */
-.contentclips-text ul.ig-social-links li a.facebook {
+ul.ig-social-links li a.facebook {
 	background: url(../images/icon-socials/facebook.png) no-repeat 2px 3px #ECEEF5;
     border: 1px solid #CAD4E7;
     width: 20px;
 }
-.contentclips-text ul.ig-social-links li a.facebook:hover {
+ul.ig-social-links li a.facebook:hover {
 	border-color: #9DACCE;
 }
-.contentclips-text ul.ig-social-links li a.twitter {
+ul.ig-social-links li a.twitter {
 	background: url(../images/icon-socials/twitter.png) no-repeat 2px 5px #EEE;
 	border: 1px solid #CCC;
 	width: 22px;
 }
-.contentclips-text ul.ig-social-links li a.googleplus {
+ul.ig-social-links li a.googleplus {
 	background: url(../images/icon-socials/gplus.png) no-repeat 8px 2px;
 	border: 1px solid rgba(0, 0, 0, 0.17);
 	width: 42px;
+}
+ul.ig-social-links {
+	margin: 0;
+	padding: 0;
+}
+ul.ig-social-links li {
+    list-style: none;
+    display: inline-block;
+    margin: 0 5px 0 0 !important;
+}
+ul.ig-social-links li a:hover {
+	text-decoration: none;
+}
+ul.ig-social-links li a {
+	font-size: 0.9em;
+	display: inline-block;
+	height: 21px;
+	-webkit-border-radius: 3px;
+	   -moz-border-radius: 3px;
+	   		border-radius: 3px;
+}
+ul.ig-social-links li a.googleplus:hover {
+	border-color: rgba(0, 0, 0, 0.3);
+}
+ul.ig-social-links li a.twitter:hover {
+	border-color: #AAA;
 }
 
 /* === Full width === */
 .ig-full-width {
     overflow-x: hidden;
+	
 }
 
 /* Video & audio No file selected */
@@ -82,4 +109,8 @@ iframe, object, video {
     line-height: 1.5em;
     text-align: center;
     margin-top: 65px;
+}
+
+.jsn-bootstrap3 .ig-element-container [class^="icon-"] {
+	margin-right: 5px;
 }

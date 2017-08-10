@@ -23,24 +23,43 @@
             var selectValue = $(this).val();
             
             if ( selectValue ) {
-                var shortcodes = $('.jsn-item textarea');
+                var shortcodes = $('#group_elements .jsn-item textarea');
                 var total = 0;
+                
                 shortcodes.each(function () {
                     var shortcode_str = $(this).html();
-                    var result 	= shortcode_str.replace(/pbar_group="[a-z\-]+"/g, 'pbar_group="' + selectValue + '"');
-                    var match 	= shortcode_str.match(/\b([0-9]+)\b/g);
-                    total += parseInt(match);
+                    var result 	  = shortcode_str.replace(/pbar_group="[a-z\-]+"/g, 'pbar_group="' + selectValue + '"');
+                    var arr_match = shortcode_str.match(/pbar_percentage="[0-9]+"/g);
+                    var str_match = '';
+                    if ( arr_match ) {
+                    	for ( var i = 0; i < arr_match.length; i++ ) {
+                        	if ( arr_match[i] ) {
+                        		str_match = arr_match[i].toString();
+                        		str_match 	  = str_match.match(/\b([0-9]+)\b/g);
+                        		total += parseInt( str_match );
+                        	}
+                        }
+                    }
                     $(this).html(result);
                 });
                 
-                // Progress total percentage
-                if ( total > 100 ) {
+                if ( selectValue == 'stacked' && total > 100 ) {
+                	// Progress total percentage
                     shortcodes.each(function () {
                         var shortcode_str = $(this).html();
-                        var match 	= shortcode_str.match(/\b([0-9]+)\b/g);
-                        var percent = parseInt(match) / (total / 100);
-                        var result 	= shortcode_str.replace(/pbar_percentage="[0-9]+"/g, 'pbar_percentage="' + percent + '"');
-                        $(this).html(result);
+                        var arr_match     = shortcode_str.match(/pbar_percentage="[0-9]+"/g);
+                        var str_match     = '';
+                        if ( arr_match ) {
+                        	for ( var i = 0; i < arr_match.length; i++ ) {
+                            	if ( arr_match[i] ) {
+                            		str_match     = arr_match[i].toString();
+                            		str_match 	  = str_match.match(/\b([0-9]+)\b/g);
+                            		var percent   = parseInt( str_match ) / (total / 100);
+                                    var result 	  = shortcode_str.replace(/pbar_percentage="[0-9]+"/g, 'pbar_percentage="' + percent + '"');
+                                    $(this).html(result);
+                            	}
+                            }
+                        }
                     });
                 }
             }

@@ -44,17 +44,6 @@ class IG_Text extends IG_Pb_Shortcode_Element {
 			'default_content' => __( 'Text', IGPBL ),
 			
 			'admin_assets' => array(
-				// jQuery Text Editor
-				'ig-pb-jquery-te-css',
-				'ig-pb-jquery-te-js',
-
-				// Color Picker
-				'ig-pb-colorpicker-css',
-				'ig-pb-colorpicker-js',
-
-				// Font Selector
-				'ig-pb-joomlashine-fontselector-js',
-
 				// Shortcode initialization
 				'ig-colorpicker.js',
 				'text.js',
@@ -100,9 +89,6 @@ class IG_Text extends IG_Pb_Shortcode_Element {
 				),
 			),
 			'styling' => array(
-				array(
-					'type' => 'preview',
-				),
 				array(
 					'name'       => __( 'Enable Dropcap', IGPBL ),
 					'id'         => 'enable_dropcap',
@@ -226,9 +212,11 @@ class IG_Text extends IG_Pb_Shortcode_Element {
 				$html_element .= "<p class='dropcap'>{$content}</p>";
 			}
 		} else {
-			$html_element .= '<p>' . $content . '</p>';
+			$formated_content = IG_Pb_Helper_Shortcode::remove_autop( $content );
+			$html_element .= $formated_content;
 		}
-		$html  = '<div class="ig_text">';
+		$container_class = 'ig_text '.$css_suffix;
+		$html  = '<div class="'.$container_class.'">';
 		$html .= $script;
 		$html .= $html_element;
 		$html .= '</div>';

@@ -20,8 +20,9 @@ if ( ! class_exists( 'IG_Item_Progressbar' ) ) {
 		public function element_config() {
 			$this->config['shortcode'] = strtolower( __CLASS__ );
 			$this->config['exception'] = array(
-				'item_text'        => __( 'Progress bar', IGPBL ),
-				'data-modal-title' => __( 'Progress Bar Item', IGPBL )
+				'item_text'        => __( 'Progress Bar Item', IGPBL ),
+				'data-modal-title' => __( 'Progress Bar Item', IGPBL ),
+
 			);
 		}
 
@@ -33,7 +34,7 @@ if ( ! class_exists( 'IG_Item_Progressbar' ) ) {
 						'id'      => 'pbar_text',
 						'type'    => 'text_field',
 						'class'   => 'input-sm',
-						'std'     => __( IG_Pb_Utils_Placeholder::add_placeholder( 'Progress bar %s', 'index' ), IGPBL ),
+						'std'     => __( IG_Pb_Utils_Placeholder::add_placeholder( 'Progress Bar Item %s', 'index' ), IGPBL ),
 						'role'    => 'title',
 						'tooltip' => __( 'Text', IGPBL )
 					),
@@ -90,7 +91,7 @@ if ( ! class_exists( 'IG_Item_Progressbar' ) ) {
 			extract( shortcode_atts( $this->config['params'], $atts ) );
 			$pbar_percentage       = floatval( $pbar_percentage );
 			$pbar_color            = ( strtolower( $pbar_color ) == 'default' || empty( $pbar_color ) ) ? $pbar_color = '' : ' ' . $pbar_color;
-			$pbar_percentage_width = ( ! $pbar_percentage ) ? '' : ' style="width: ' . $pbar_percentage . '%"';
+			$percent               = ( ! $pbar_percentage ) ? '' : $pbar_percentage . '%';
 			$pbar_value			   = ( ! $pbar_percentage ) ? '' : ' aria-valuenow="' . $pbar_percentage . '"';
 			$pbar_item_style       = ( ! $pbar_item_style || strtolower( $pbar_item_style ) == 'solid' ) ? '' : $pbar_item_style;
 			if ( $pbar_item_style == 'striped' ) {
@@ -101,18 +102,18 @@ if ( ! class_exists( 'IG_Item_Progressbar' ) ) {
 			$html_content = "[icon]{$pbar_icon}[/icon][text]{$pbar_text}[/text]";
 
 			// Add title progressbar
-			$html_content = "<div class='progress-info'[width]><span class='progress-title'>{$html_content}</span>[percentage]<span class='progress-percentage'>{$pbar_percentage}%</span>[/percentage]</div>";
+			$html_content = "<div class='full-progress-bar'><div class='progress-info'[width]><span class='progress-title'>{$html_content}</span>[percentage]<span class='progress-percentage'>{$pbar_percentage}%</span>[/percentage]</div>";
 
 			if ( $pbar_group == 'stacked' ) {
 				$html_content = str_replace( '[width]', "style='width:{$pbar_percentage}%'", $html_content );
 				$html_sub_elm = '[sub_content]' . $html_content . '[/sub_content]';
-				$html_sub_elm .= "<div class='progress-bar{$pbar_color}{$pbar_item_style}'{$pbar_percentage_width}></div>";
+				$html_sub_elm .= "<div class='progress-bar{$pbar_color}{$pbar_item_style}' {$pbar_value}></div></div>";
 			} else {
 				$html_content = str_replace( '[width]', '', $html_content );
 				$html_sub_elm = '[sub_content]' . $html_content . '[/sub_content]';
 				$html_sub_elm .= "<div class='progress{$pbar_item_style}{active}'>";
-				$html_sub_elm .= "<div class='progress-bar {$pbar_color}' role='progressbar'{$pbar_value}aria-valuemin='0' aria-valuemax='100'{$pbar_percentage_width}></div>";
-				$html_sub_elm .= '</div>';
+				$html_sub_elm .= "<div class='progress-bar {$pbar_color}' role='progressbar'{$pbar_value} aria-valuemin='0' aria-valuemax='100'><span class='sr-only'>{$percent}</span></div>";
+				$html_sub_elm .= '</div></div>';
 			}
 
 			return $html_sub_elm . '<!--seperate-->';

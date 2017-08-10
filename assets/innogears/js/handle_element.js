@@ -13,9 +13,7 @@
 		clicked_column : null,
 		if_childmodal : 0,
 		modal_settings : {
-			modalId: 'jsn_view_modal',
-			sub_modalId: 'jsn_view_modal_sub',
-			sub_modalChildId: 'jsn_view_modal_sub_child'
+			modalId: 'jsn_view_modal'
 		},
 		effect: 'easeOutCubic'
 	}
@@ -135,20 +133,22 @@
 	 */
 	$.HandleElement.addElement = function() {
 		$("body").delegate(".ig-add-element .shortcode-item","click",function(e) {
-			self_(e, this);
+			_self(e, this);
 		});
 		$("#ig-add-element").delegate(".shortcode-item","click",function(e) {
-			self_(e, this);
+			_self(e, this);
 		});
 
-		function self_(e, this_){
+		function _self(e, this_){
 			e.preventDefault();
+			var $shortcode = $(this_).attr('data-shortcode');
+			var $type = $(this_).parent().attr('data-type');
 
 			if($.PbDoing.addElement)
 				return;
 			$.PbDoing.addElement = 1;
 
-					// check if adding shortcode from button in Classic Editor
+			// check if adding shortcode from button in Classic Editor
 			if($(this_).parents('#ig-shortcodes').length)
 				top.addInClassic = 1;
 
@@ -160,12 +160,11 @@
 			$("#ig-add-element").hide();
 			$.HandleElement.showLoading();
 
-			// get title of clicked element
+			// Get title of clicked element
 			clk_title_el = $.trim($(this_).html().replace(/<i\sclass.*><\/i>/, ''));
 
 			// Append element to PageBuilder
-			var $shortcode = $(this_).attr('data-shortcode');
-			var $type = $(this_).parent().attr('data-type');
+
 			$.HandleElement.appendToHolder($shortcode, null, $type);
 		}
 	},
@@ -174,86 +173,89 @@
 	 * Add sub Item on Modal setting of an element (Accordion, Tab, Carousel...)
 	 */
 	$.HandleElement.addItem = function() {
+		// Add Element in Pagebuilder
 		$(".ig-pb-form-container").delegate(".ig-more-element","click",function(e) {
+			_self(e, this);
+		});
+
+		// Add Item in Modal
+		$("body").delegate(".ig-more-element","click",function(e) {
+			_self(e, this);
+		});
+
+		function _self(e, this_){
 			e.preventDefault();
 
-			$.options.clicked_column = $(this).parent('.item-container').find('.item-container-content');
+			$.options.clicked_column = $(this_).parent('.item-container').find('.item-container-content');
 			// add item in Accordion/ List ...
-			if ($(this).attr('data-shortcode-item') != null) {
+			if ($(this_).attr('data-shortcode-item') != null) {
 				$.HandleElement.showLoading();
 
 				$.options.new_sub_element = true;
 				var $count = $.options.clicked_column.find(".jsn-item").length;
 				var $replaces = {};
 				$replaces['index'] = parseInt($count) + 1;
-				$.HandleElement.appendToHolder($(this).attr('data-shortcode-item'), $replaces);
+				// Get title of clicked element
+				clk_title_el = $.trim($(this_).attr('item_common_title'));
+
+				$.HandleElement.appendToHolder($(this_).attr('data-shortcode-item'), $replaces);
 			}
-		});
+		}
 	},
 
 	/**
 	 * delete an element (a row OR a column OR an shortcode item)
 	 */
 	$.HandleElement.deleteElement = function() {
-		$(".ig-pb-form-container").delegate(".element-delete","click",function(){
-			var msg,is_column;
-			if($(this).hasClass('row') || $(this).attr("data-target") == "row_table"){
-				msg = Ig_Translate.delete_row;
-			}else if($(this).hasClass('column') || $(this).attr("data-target") == "column_table"){
-				msg = Ig_Translate.delete_column;
-				is_column = 1;
-			}else{
-				msg = Ig_Translate.delete_element;
-			}
-
-			var confirm_ = confirm(msg);
-			if(confirm_){
-				var $column = $(this).parent('.jsn-iconbar').parent('.shortcode-container');
-				if(is_column == 1)
-				{
-					// Delete a Column in Table element
-					if($(this).attr("data-target") == "column_table")
-					{
-						var table = new $.IGTable();
-						table.deleteColRow($(this), 'column', Ig_Translate);
-						$.HandleSetting.shortcodePreview();
-					}
-					else{
-						var $row = $column.parent('.row-content').parent('.row-region');
-						// if is last column of row, remove parent row
-						if($column.parent('.row-content').find('.column-region').length == 1){
-							$.HandleElement.removeElement($row);
-						}else{
-							$.HandleElement.removeElement($column);
-						}
-					}
-				}
-				else{
-					// Delete a Row in Table element
-					if($(this).attr("data-target") == "row_table"){
-						table = new $.IGTable();
-						table.deleteColRow($(this), 'row', Ig_Translate);
-						$.HandleSetting.shortcodePreview();
-					}else{
-						$.HandleElement.removeElement($column);
-					}
-				}
-			}
+		$('body').on("click", ".ig-pb-form-container .element-delete", function(e) {
+			$.HandleElement._deleteElement(this);
 		});
 	},
-	// request to get html template of shortcode
-	$.HandleElement.getShortcodeTpl = function($shortcode, $type, callback){
-		$.post(
-			Ig_Ajax.ajaxurl,
-			{
-				action 		: 'get_shortcode_tpl',
-				shortcode   : $shortcode,
-				type   : $type,
-				ig_nonce_check : Ig_Ajax._nonce
-			},
-			function( data ) {
-				callback(data);
-			})
+
+	$.HandleElement._deleteElement = function(target, silent) {
+		var msg,is_column;
+
+		if ($(target).hasClass('row') || $(target).attr("data-target") == "row_table") {
+			msg = Ig_Translate.delete_row;
+		} else if ($(target).hasClass('column') || $(target).attr("data-target") == "column_table") {
+			msg = Ig_Translate.delete_column;
+			is_column = 1;
+		} else {
+			msg = Ig_Translate.delete_element;
+		}
+
+		var confirm_ = silent ? true : confirm(msg);
+
+		if (confirm_) {
+			var $column = $(target).parent('.jsn-iconbar').parent('.shortcode-container');
+
+			if (is_column == 1) {
+				// Delete a Column in Table element
+				if($(target).attr("data-target") == "column_table") {
+					var table = new $.IGTable();
+					table.deleteColRow($(target), 'column', Ig_Translate);
+					$.HandleSetting.shortcodePreview();
+				} else {
+					var $row = $column.parent('.row-content').parent('.row-region');
+
+					// If this is the last column of a row, remove the row instead
+					if ($column.parent('.row-content').find('.column-region').length == 1) {
+						$.HandleElement.removeElement($row, !silent);
+					} else {
+						$.HandleElement.removeElement($column, !silent);
+					}
+				}
+			} else {
+				// Delete a Row in Table element
+				if ($(target).attr("data-target") == "row_table") {
+					table = new $.IGTable();
+					table.deleteColRow($(target), 'row', Ig_Translate);
+					$.HandleSetting.shortcodePreview();
+				} else {
+					$.HandleElement.removeElement($column, !silent);
+				}
+			}
+		}
 	},
 
 	/**
@@ -272,24 +274,25 @@
 		}
 
 		// get HTML template of shortcode
-		var html;
+		var html, appent_obj;
 		if ( sc_html ) {
-			$.HandleElement.appendToHolderFinish($shortcode, sc_html, $replaces, append_to_div, null, elem_title);
+			appent_obj = $.HandleElement.appendToHolderFinish($shortcode, sc_html, $replaces, append_to_div, null, elem_title);
 		} else {
-			if($("#tmpl-"+$shortcode).length == 0){
-				// request to get html template of shortcode
-				$type = ($type != null) ? $type : 'element';
-				$.HandleElement.getShortcodeTpl($shortcode, $type, function(data){
-					$('body').append(data);
-					html = $("#tmpl-"+$shortcode).html();
-					$.HandleElement.appendToHolderFinish($shortcode, html, $replaces, append_to_div, $type, elem_title);
-				});
-			}
-			else{
-				html = $("#tmpl-"+$shortcode).html();
-				$.HandleElement.appendToHolderFinish($shortcode, html, $replaces, append_to_div, null, elem_title);
-			}
+			html = $("#tmpl-"+$shortcode).html();
+			appent_obj = $.HandleElement.appendToHolderFinish($shortcode, html, $replaces, append_to_div, null, elem_title);
 		}
+		// Load the default shortcode structure then append it
+		$.post(
+				Ig_Ajax.ajaxurl,
+				{
+					action 		: 'get_default_shortcode_structure',
+					shortcode   : $shortcode,
+					type   : $type,
+					ig_nonce_check : Ig_Ajax._nonce
+				},
+				function( data ) {
+					$('textarea.shortcode-content', appent_obj).html(data);
+				});
 	},
 	$.HandleElement.elTitle = function($shortcode, clk_title_el, exclude_this){
 		if(clk_title_el == '')
@@ -336,6 +339,9 @@
 			return alert(Ig_Translate.element_not_existed);
 		}
 
+		// Add loading icon for add element button
+		$('<i class="jsn-icon16 jsn-icon-loading"></i>').appendTo('.rawshortcode-container');
+
 		// Request server-side to generate HTML code for insertion
 		$.ajax({
 			url: Ig_Ajax.ig_modal_url + '&action=insert',
@@ -343,6 +349,8 @@
 			data: {raw_shortcode: shortcode},
 			complete: function(response, status) {
 				if (status == 'success') {
+					// Remove icon loading beside button add element
+					$('.rawshortcode-container .jsn-icon-loading').remove();
 					// Toggle adding state
 					$(btn).prev('textarea').val('').text('').parent().removeClass('ig-loading');
 
@@ -355,49 +363,108 @@
 		});
 	};
 
-	$.HandleElement.appendToHolderFinish = function($shortcode, html, $replaces, append_to_div, $type, elem_title) {
-		// hide popover
-		$("#ig-add-element").hide();
-		// count existing elements which has same type
-		append_title_el = $.HandleElement.elTitle($shortcode, clk_title_el);
-		if ( append_title_el.indexOf('undefined') >= 0 ) {
-			append_title_el = ''
-		}
-		if ( elem_title ) {
-			append_title_el = elem_title;
-		}
+	$.HandleElement.appendToHolderFinish = function($shortcode, html, $replaces, append_to_div, $type, elem_title, position) {
+		// Append new element
+		if (position) {
+			var	rows = $('#ig_page_builder .jsn-row-container'),
+				html = $(html).css({
+					display: '',
+					height: '',
+					opacity: '',
+					overflow: '',
+					'min-height': '',
+					'padding-bottom': '',
+					'padding-top': '',
+				});
 
-		if($type != null && $type == 'widget'){
-			html = ig_pb_remove_placeholder(html, 'widget_title', 'title='+append_title_el);
-		}else{
-			html = html.replace(/el_title=\"\"/, 'el_title="'+append_title_el+'"');
-		}
-		$(".active-shortcode").removeClass('active-shortcode');
-		$(".ig-selected-element").removeClass('ig-selected-element');
-		html = ig_pb_remove_placeholder(html, 'extra_class', 'ig-selected-element');
-		if($replaces != null){
-			html = ig_pb_remove_placeholder(html, 'index', $replaces['index']);
-		}
-		else{
-			var idx = 0;
-			html = ig_pb_remove_placeholder(html, 'index', function(match, number){
-				return ++idx;
-			});
-		}
-		// animation
-		append_to_div.append(ig_pb_remove_placeholder(html, 'custom_style', 'style="display:none"'));
-		var new_el = append_to_div.find('.jsn-element').last();
-		var height_ = new_el.height();
-		$.HandleElement.appendElementAnimate(new_el, height_);
+			for (var i = 0; i < rows.length; i++) {
+				if (i == position.row) {
+					var columns = rows.eq(i).find('.jsn-column-container');
 
-		// Show loading image
-		if ( $(append_to_div).find('.jsn-item').length ) {
-			$(append_to_div).find('.jsn-item').last().append('<i class="jsn-icon16 jsn-icon-loading"></i>');
-		}
+					for (var j = 0; j < columns.length; j++) {
+						if (j == position.column) {
+							var elements = columns.eq(j).find('.jsn-element');
 
-		// open Setting Modal box right after add new element
-		$(".ig-selected-element .element-edit").trigger('click');
-	}
+							if (elements.length) {
+								if (position.position >= elements.length) {
+									elements.last().after(html);
+								} else {
+									for (var k = 0; k < elements.length; k++) {
+										if (k == position.position) {
+											elements.eq(k).before(html);
+
+											break;
+										}
+									}
+								}
+							} else {
+								columns.eq(j).find('.jsn-element-container').prepend(html);
+							}
+
+							break;
+						}
+					}
+
+					// Remove junk element
+					html.find('i.jsn-icon-loading').remove();
+
+					break;
+				}
+			}
+		} else {
+			// Hide popover
+			$("#ig-add-element").hide();
+
+			// Count existing elements which has same type
+			append_title_el = $.HandleElement.elTitle($shortcode, clk_title_el);
+
+			if (append_title_el.indexOf('undefined') >= 0) {
+				append_title_el = '';
+			}
+
+			if (elem_title) {
+				append_title_el = elem_title;
+			}
+
+			if ($type != null && $type == 'widget') {
+				html = ig_pb_remove_placeholder(html, 'widget_title', 'title=' + append_title_el);
+			} else if (typeof html == 'string') {
+				html = html.replace(/el_title=\"\"/, 'el_title="' + append_title_el + '"');
+			}
+
+			if ($replaces != null) {
+				html = ig_pb_remove_placeholder(html, 'index', $replaces['index']);
+			} else {
+				var idx = 0;
+
+				html = ig_pb_remove_placeholder(html, 'index', function(match, number){
+					return ++idx;
+				});
+			}
+
+			html = $(ig_pb_remove_placeholder(html, 'custom_style', 'style="display:none"'));
+
+			append_to_div.append(html);
+
+			// Check if this is not a sub-item
+			if (!($shortcode.match(/_item_/) || !append_to_div.hasClass('jsn-element-container'))) {
+				// Trigger an event after adding an element
+				$(document).trigger('ig_pb_after_add_element', html);
+			}
+
+			// Animation
+			var height_ = html.height();
+
+			$.HandleElement.appendElementAnimate(html, height_);
+
+			// Show loading image
+			html.append('<i class="jsn-icon16 jsn-icon-loading"></i>');
+
+			// Open Setting Modal box right after add new element
+			html.find('.element-edit').trigger('click');
+		}
+		return html;
+	},
 
 	// animation when add new element to container
 	$.HandleElement.appendElementAnimate = function(new_el, height_, callback, finished){
@@ -427,64 +494,95 @@
 				if(finished)finished();
 			});
 		});
-	}
+	},
 
 	/**
 	 * Remove an element in IG PageBuilder / In Modal
 	 */
-	$.HandleElement.removeElement = function(element) {
-		element.css({
-			'min-height' : 0,
-			'overflow' : 'hidden'
-		});
-		element.animate({
-			opacity:0
-		},300,$.options.effect,function(){
-			element.animate({
-				height:0,
-				'padding-top' : 0,
-				'padding-bottom' : 0
-			},300,$.options.effect,function(){
-				element.remove();
-				$('body').trigger('on_after_delete_element');
-				// for shortcode which has sub-shortcode
-				if ($("#modalOptions").find('.has_submodal').length > 0){
-					$.HandleElement.rescanShortcode();
-				}
-				$('.ig-pb-form-container').trigger('ig-pagebuilder-layout-changed');
+	$.HandleElement.removeElement = function(element, announce) {
+		if (announce) {
+			// Prepare for animation
+			element.css({
+				'min-height' : 0,
+				'overflow' : 'hidden'
 			});
-		});
-	},
 
+			// Animate
+			element.animate({
+				opacity: 0
+			}, 300, $.options.effect, function() {
+				element.animate({
+					height: 0,
+					'padding-top': 0,
+					'padding-bottom': 0
+				}, 300, $.options.effect, function() {
+					// Trigger an event before deleting an element
+					$(document).trigger('ig_pb_before_delete_element', element);
+
+					element.remove();
+
+					// Trigger an event after deleting an element
+					$(document).trigger('ig_pb_after_delete_element');
+
+					// For shortcode which has sub-shortcode
+					if ($("#modalOptions").find('.has_submodal').length > 0) {
+						$.HandleElement.rescanShortcode();
+					}
+
+					$('.ig-pb-form-container').trigger('ig-pagebuilder-layout-changed');
+				});
+			});
+		} else {
+			element.remove();
+
+			// For shortcode which has sub-shortcode
+			if ($("#modalOptions").find('.has_submodal').length > 0) {
+				$.HandleElement.rescanShortcode();
+			}
+
+			$('.ig-pb-form-container').trigger('ig-pagebuilder-layout-changed');
+		}
+	},
 
 	// Clone an Element
 	$.HandleElement.cloneElement = function() {
-		$(".ig-pb-form-container").delegate(".element-clone","click",function(){
-			if($.PbDoing.cloneElement)
+		$('body').on("click", ".ig-pb-form-container .element-clone", function(e) {
+			if ($.PbDoing.cloneElement) {
 				return;
+			}
+
 			$.PbDoing.cloneElement = 1;
 
-			var parent_item = $(this).parent('.jsn-iconbar').parent('.jsn-item');
-			var height_ = parent_item.height();
-			var clone_item = parent_item.clone(true);
+			var	parent_item = $(this).parent('.jsn-iconbar').parent('.jsn-item'),
+				height_ = parent_item.height(),
+				clone_item = parent_item.clone(true),
+				item_class = $('#modalOptions').length ? '.jsn-item-content' : '.ig-pb-element';
 
-			var item_class = $('#modalOptions').length ? '.jsn-item-content' : '.ig-pb-element';
-			// update title for clone element
+			// Update title for clone element
 			var html = clone_item.html();
-			if(item_class == '.jsn-item-content')
+
+			if (item_class == '.jsn-item-content') {
 				append_title_el = parent_item.find(item_class).html();
-			else
+			} else {
 				append_title_el = parent_item.find(item_class).find('span').html();
+			}
+
 			if (append_title_el) {
 				var regexp = new RegExp(append_title_el, "g");
+
 				html = html.replace(regexp, append_title_el + ' ' + Ig_Translate.copy);
 			}
+
 			clone_item.html(html);
 
-			// add animation before insert
-			$.HandleElement.appendElementAnimate(clone_item, height_, function(){
+			// Add animation before insert
+			$.HandleElement.appendElementAnimate(clone_item, height_, function() {
 				clone_item.insertAfter(parent_item);
-				if($('.ig-pb-form-container').hasClass('fullmode')){
+
+				// Trigger an event after cloning an element
+				$(document).trigger('ig_pb_after_add_element', [clone_item, 'cloned']);
+
+				if ($('.ig-pb-form-container').hasClass('fullmode')) {
 					// active iframe preview for cloned element
 					$(clone_item[0]).find('form.shortcode-preview-form').remove();
 					$(clone_item[0]).find('iframe').remove();
@@ -492,7 +590,7 @@
 				}
 
 				$.HandleElement.rescanShortcode();
-			}, function(){
+			}, function() {
 				$.PbDoing.cloneElement = 0;
 			});
 		});
@@ -500,54 +598,91 @@
 
 	// Deactivate an Element
 	$.HandleElement.deactivateElement = function() {
-		$(".ig-pb-form-container").delegate(".element-deactivate","click",function(){
-			var parent_item = $(this).parents('.jsn-item');
-			var textarea	= parent_item.find("[data-sc-info^='shortcode_content']").first();
-			var textarea_text = textarea.text();
+		$('body').on("click", ".ig-pb-form-container .element-deactivate", function(e) {
+			var	parent_item = $(this).parents('.jsn-item'),
+				before = parent_item.outerHTML(),
+				textarea = parent_item.find("[data-sc-info^='shortcode_content']").first(),
+				textarea_text = textarea.text(),
+				child_i = $(this).find('i');
 
-			var child_i = $(this).find('i');
-			if(child_i.hasClass('icon-checkbox-partial')){
+			if (child_i.hasClass('icon-checkbox-partial')) {
 				textarea_text = textarea_text.replace('disabled_el="yes"', 'disabled_el="no"');
-				// update icon
+
+				// Update icon
 				child_i.removeClass('icon-checkbox-partial').addClass('icon-checkbox-unchecked');
-				// update title
+
+				// Update title
 				$(this).attr('title', Ig_Translate.disabled.deactivate);
 			} else {
-				if ( textarea_text.indexOf('disabled_el="no"') > 0 ) {
+				if (textarea_text.indexOf('disabled_el="no"') > 0) {
 					textarea_text = textarea_text.replace('disabled_el="no"', 'disabled_el="yes"');
 				} else {
 					textarea_text = textarea_text.replace(']', ' disabled_el="yes" ]');
 				}
-				// update icon
+
+				// Update icon
 				child_i.removeClass('icon-checkbox-unchecked').addClass('icon-checkbox-partial');
-				// update title
+
+				// Update title
 				$(this).attr('title', Ig_Translate.disabled.reactivate);
 			}
+
 			parent_item.toggleClass('disabled');
-			// replace shortcode content
+
+			// Replace shortcode content
 			textarea.text(textarea_text);
+
+			// Trigger an event after activating / deactivating an element
+			$(document).trigger('ig_pb_after_edit_element', [parent_item, before]);
+
 			$('.ig-pb-form-container').trigger('ig-pagebuilder-layout-changed');
 		});
 	},
 
 	// Edit an Element in IG PageBuilder / in Modal
 	$.HandleElement.editElement = function() {
-		$(".ig-pb-form-container").delegate(".element-edit","click",function(e, restart_edit){
+		// Fix error in element which uses Ajax modal and has child element (Accordion)
+		$('body').on("click", ".ig-dialog", function (e) {
 			e.preventDefault();
+		});
 
-            if($(this).attr('data-custom-action'))
-				return;
+		$('body').on("click", ".ig-dialog input:radio, .ig-dialog input:checkbox, .ig-dialog label[for]", function (e) {
+			e.stopPropagation();
+		});
 
-			$.HandleElement.showLoading();
+		// Add action edit element directly on layout page without click edit element icon.
+		$('body').on('click', '.item-container-content .jsn-element', function (e, restart_edit) {
+			e.stopPropagation();
 
-			if($.PbDoing.editElement && restart_edit == null)
-				return;
+			// Prevent trigger edit element when click jsn-iconbar collections
+			if ( $(e.target).closest('.jsn-iconbar').length || $(e.target).hasClass('element-drag') ) {
+				return false;
+			}
+			$(this).find('.jsn-iconbar .element-edit').trigger('click');
+		});
 
-			$.PbDoing.editElement = 1;
+		$('body').on("click", ".ig-pb-form-container .element-edit", function (e, restart_edit) {
+			e.stopPropagation();
 
-			$(".ig-selected-element").removeClass('ig-selected-element');
-			$(".ig-pb-form-container .active-shortcode").removeClass('active-shortcode');
-			var parent_item, shortcode = $(this).attr("data-shortcode"), el_title = '';
+            if ($(this).attr('data-custom-action')) {
+                return;
+            }
+			// Main variables
+            var parent_item, shortcode = $(this).attr("data-shortcode"), el_title = '';
+
+			// Modal of current shortcode is open
+            if ($.options.current_shortcode == shortcode && restart_edit == null) {
+                return;
+            }
+
+			// Hide exit modal
+//            $.HandleElement.removeModal();
+
+			// Show loading icon
+            $.HandleElement.showLoading();
+
+			// Set flag to sign editting a shortcode, prevent duplicator
+            $.options.current_shortcode = shortcode;
 
 			// Set temporary flag to sign current editted element
 			var cur_shortcode    = $(this).parents('.jsn-item').find('textarea.shortcode-content:first');
@@ -556,18 +691,18 @@
 				cur_shortcode.html(cur_shortcode.val().replace('[' + shortcode, '[' + shortcode + ' ' + editted_flag_str + ' ' ));
 			}
 
-			if($(this).hasClass('row')){
-				parent_item = $(this).parent('.jsn-iconbar').parent('.jsn-row-container');
-				el_type		= 'element';
-			}
-			else{
-				parent_item = $(this).parent('.jsn-iconbar').parent('.jsn-item');
-				el_type		= parent_item.attr('data-el-type');
-			}
-			parent_item.addClass('active-shortcode');
+			// Get wrapper div & Type of current shortcode
+            if ($(this).hasClass('row')) {
+                parent_item = $(this).parent('.jsn-iconbar').parent('.jsn-row-container');
+                el_type = 'element';
+            }
+            else {
+                parent_item = $(this).parent('.jsn-iconbar').parent('.jsn-item');
+                el_type = parent_item.attr('data-el-type');
+            }
+            parent_item.addClass('active-shortcode');
 
-			$.HandleElement.removeModal();
-
+			// Get Heading text for Modal settings
 			if(el_type == 'widget'){
 				el_title = $.HandleElement.elTitle(shortcode, clk_title_el, 1);
 			}
@@ -576,23 +711,21 @@
 				el_title = Ig_Translate.no_title;
 			}
 
+			// Get shortcode content
 			var params		= parent_item.find("[data-sc-info^='shortcode_content']").first().text();
 
+			// Get custom info for the Modal : frameId, frame_url
 			var title = $.HandleElement.getModalTitle(shortcode, parent_item.attr('data-modal-title'));
 			var frameId = $.options.modal_settings.modalId;
 			var has_submodal = 0;
 			if( $(this).parents('.has_submodal').length > 0 ){
 				has_submodal = 1;
-				frameId = $.options.modal_settings.sub_modalId;
-			}
-
-			if( $(this).parents('.has_childsubmodal').length > 0 ){
-				has_submodal = 1;
-				frameId = $.options.modal_settings.sub_modalChildId;
+				el_title = $.HandleElement.elTitle(shortcode, clk_title_el, 1);
 			}
 
 			var frame_url = Ig_Ajax.ig_modal_url + '&ig_modal_type=' + shortcode;
 
+			// Append temporary form to submit
 			var form = $("<form/>").attr({
 				method: "post",
 				style: "display:none",
@@ -604,10 +737,18 @@
 			form.append($("<input/>").attr( {name : "el_title", value : el_title} ) );
 			form.append($("<input/>").attr( {name : "submodal", value : has_submodal} ) );
 
-			// Check if this element require iframe for editing
-			var parent_shortcode = shortcode.replace('_item', '');
-            		var iframe_required = !parseInt($('button.shortcode-item[data-shortcode="' + parent_shortcode + '"]').attr('data-use-ajax'));
+			// Check if this element/its parent element requires iframe for editing
+			var	parent_shortcode = shortcode.replace('_item', ''),
+				iframe_required = !parseInt($(e.target.nodeName == 'I' ? e.target.parentNode : e.target).attr('data-use-ajax'));
 
+			if (iframe_required) {
+				iframe_required = !parseInt($('button.shortcode-item[data-shortcode="' + parent_shortcode + '"]').attr('data-use-ajax'));
+			}
+
+			// for Pricing table attributes
+			if ( $(this).closest('.jsn-item').attr('data-using-ajax') === '1' ) {
+				iframe_required = false;
+			}
 			var modal = new $.IGModal({
 				iframe: iframe_required,
 				frameId: frameId,
@@ -620,14 +761,13 @@
 					'id'    : 'delete_element',
 					'class' : 'btn btn-danger pull-right',
 					'click' : function() {
-						var current_element = '';
-						if ( $('.active-shortcode').length == 1 )
-							current_element = $('.active-shortcode');
-						if ( $('.ig-selected-element').length ==1 )
-							current_element = $('.ig-selected-element');
+						$.HandleElement.enablePageScroll();
+
+						var current_element = $('.active-shortcode').last();
 
 						if ( current_element && $.HandleCommon.removeConfirmMsg( current_element, 'element' ) ) {
-							$.HandleElement.closeModal(iframe_required ? window.parent.jQuery.noConflict()( '#' + frameId ) : modal.container);
+							$.HandleElement.removeSelect2Active();
+							$.HandleElement.closeModal(iframe_required ? window.parent.jQuery.noConflict()( '#' + frameId ) : modal.container, iframe_required);
 						}
 					}
 				}, {
@@ -635,10 +775,11 @@
 					'id'	: 'selected',
 					'class' : 'btn btn-primary ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only',
 					'click'	: function() {
+						$.HandleElement.enablePageScroll();
 						$(this).attr('disabled', 'disabled');
 						$('body').trigger('add_exclude_jsn_item_class');
-						$.HandleElement.closeModal(iframe_required ? window.parent.jQuery.noConflict()( '#' + frameId ) : modal.container);
-						var cur_shortcode   = $(".ig-pb-form-container .active-shortcode").find('textarea.shortcode-content:first');
+						$.HandleElement.closeModal(iframe_required ? window.parent.jQuery.noConflict()( '#' + frameId ) : modal.container, iframe_required);
+						var cur_shortcode   = $(".ig-pb-form-container .active-shortcode").last().find('textarea.shortcode-content:first');
 						if (cur_shortcode.length > 0) {
 							cur_shortcode.html(cur_shortcode.html().replace(new RegExp(editted_flag_str, 'g'), ''));
 						}
@@ -648,6 +789,8 @@
 					'id'	: 'close',
 					'class' : 'btn btn-default ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only',
 					'click'	: function() {
+						$.HandleElement.removeSelect2Active();
+						$.HandleElement.enablePageScroll();
 //						modal.close();
 						$('body').trigger('add_exclude_jsn_item_class');
 
@@ -656,11 +799,17 @@
 
 						$.HandleElement.finalize(is_submodal);
 
+						// Get current active shortcode
+						var active_item = $(".ig-pb-form-container .active-shortcode").last();
+
 						// Update Element Title to Active element (only for not child element)
 						if (!$.options.new_sub_element && append_title_el) {
-							var active_title = $(".ig-pb-form-container .active-shortcode").find('.ig-pb-element').first();
+							var active_title = active_item.find('.ig-pb-element').first();
 
-							if (active_title.length) {
+							// Check current edit element has exists title.
+							var active_title_span = active_item.find('.ig-pb-element span').first();
+
+							if (!is_submodal && active_title.length && active_title_span.length == 0) {
 								active_title.html(active_title.html().split(':')[0] + ": " + '<span>' + Ig_Translate.no_title + '</span>');
 							}
 
@@ -668,13 +817,13 @@
 						}
 
 						// remove loading image from active child element
-						$(".ig-pb-form-container .active-shortcode").find('.jsn-icon-loading').remove();
+						active_item.find('.jsn-icon-loading').remove();
 
-						$(".ig-pb-form-container .active-shortcode").removeClass('active-shortcode');
+						active_item.removeClass('active-shortcode');
 
 						$('body').trigger('on_update_shortcode_widget', 'is_cancel');
 						// Remove editted flag
-						var cur_shortcode   = $(".ig-pb-form-container .active-shortcode").find('textarea.shortcode-content:first');
+						var cur_shortcode   = active_item.find('textarea.shortcode-content:first');
 						if (cur_shortcode.length > 0) {
 							cur_shortcode.html(cur_shortcode.html().replace(new RegExp(editted_flag_str, 'g'), ''));
 						}
@@ -692,6 +841,17 @@
 					if ( title != null && title.indexOf(index) >= 0 ) {
 						$(iframe).contents().find('[data-role="title"]').val('');
 					}
+
+					// Track shortcode content change
+					$.HandleElement.__changed = false;
+
+					setTimeout(function() {
+						if (iframe.contentWindow) {
+							iframe.contentWindow.jQuery('#shortcode_content').change(function() {
+								window.parent.jQuery.HandleElement.__changed = true;
+							});
+						}
+					}, 2000);
 				},
 				fadeIn:200,
 				scrollable: true,
@@ -699,7 +859,7 @@
 				height: resetModalSize(has_submodal, 'h')
 			});
 
-			modal.show(function(modal){
+			modal.show(function(modal) {
 				if (iframe_required) {
 					// Append form to document body so it can be submitted
 					$("body").append(form);
@@ -716,6 +876,9 @@
 
 					// Remove form
 					setTimeout(function(){form.remove();}, 200);
+
+					// Make page unscrollable
+					$.HandleElement.disablePageScroll();
 				} else {
 					// Request server for necessary data
 					$.ajax({
@@ -725,10 +888,26 @@
 						dataType: 'html',
 						complete: function(data, status) {
 							if (status == 'success') {
-								modal.container.html(data.responseText);
-								setTimeout(function (){
-									modal.container.dialog('open').dialog('moveToTop');
-								}, 500);
+								if ( $('#' + $.options.modal_settings.modalId).length == 0 ) {
+									modal.container.attr('id', $.options.modal_settings.modalId);
+								}
+								modal.container.html(data.responseText).dialog('open').dialog('moveToTop');
+
+								// Track shortcode content change
+								$.HandleElement.__changed = false;
+
+								setTimeout(function() {
+									modal.container.find('#shortcode_content').change(function() {
+										$.HandleElement.__changed = true;
+									});
+								}, 2000);
+
+								// Make page unscrollable
+								$.HandleElement.disablePageScroll();
+								
+								if ( $('.jsn-modal').last().attr('id') != $.options.modal_settings.modalId ) {
+									$('body').trigger('ig_submodal_load',[modal.container]);
+								}
 							}
 						}
 					});
@@ -742,6 +921,25 @@
 			}, 3000);
 		});
 	},
+
+	// Remove select2 active
+	$.HandleElement.removeSelect2Active = function () {
+		$('.select2-drop-active').remove();
+	}
+
+	// Disable page scroll
+	$.HandleElement.disablePageScroll = function() {
+		if ( $('body').hasClass('wp-admin') ) {
+			$('body').addClass('ig-overflow-hidden');
+		}
+	}
+
+	// Enable page scroll
+	$.HandleElement.enablePageScroll = function() {
+		if ( $('body').hasClass('wp-admin') ) {
+			$('body').removeClass('ig-overflow-hidden');
+		}
+	}
 
 	// fix error of TinyMCE on Modal setting iframe
 	$.HandleElement.fixTinyMceError = function(){
@@ -772,6 +970,7 @@
 	 * Remove Modal, Show Loading, Hide Loading
 	 */
 	$.HandleElement.removeModal = function() {
+		$.HandleElement.enablePageScroll();
 		$('.jsn-modal').remove();
 	},
 
@@ -807,11 +1006,16 @@
 	},
 
 	// Hide Overlay of Modal
-	$.HandleElement.hideLoading = function(container) {
+	$.HandleElement.hideLoading = function(container, is_submodal) {
 		container = container ? $(container) : $('body');
 		var $selector = $;//window.parent.jQuery.noConflict()
-		$selector('.jsn-modal-overlay', container).hide();
-		$selector('.jsn-modal-indicator', container).hide();
+		if(is_submodal){
+			$selector('.jsn-modal-overlay').last().hide();
+			$selector('.jsn-modal-indicator').last().hide();
+		} else {
+			$selector('.jsn-modal-overlay').remove();
+			$selector('.jsn-modal-indicator').remove();
+		}
 	},
 
 	/**
@@ -839,9 +1043,9 @@
 	 * For Parent Shortcode: Rescan sub-shortcodes content, call preview
 	 * function to regenerate preview
 	 */
-	$.HandleElement.rescanShortcode = function(curr_iframe, callback) {
+	$.HandleElement.rescanShortcode = function(curr_iframe, callback, child_element) {
 		try {
-			$.HandleSetting.shortcodePreview(null, null, curr_iframe, callback);
+			$.HandleSetting.shortcodePreview(null, null, curr_iframe, callback, 1, child_element);
 		} catch (err) {
 			// Do nothing
 		}
@@ -850,42 +1054,47 @@
 	/**
 	 * save shortcode data before close Modal
 	 */
-	$.HandleElement.closeModal = function(curr_iframe) {
+	$.HandleElement.closeModal = function(curr_iframe, iframe_required) {
 		$.options.curr_iframe_ = curr_iframe;
 
 		var	contents = curr_iframe.contents ? curr_iframe.contents() : curr_iframe,
-            submodal = contents.find('.has_submodal'),
-            submodal2 = curr_iframe.contents().find('.submodal_frame_2');
+			submodal = contents.find('.has_submodal'),
+			submodal2 = curr_iframe.contents().find('.submodal_frame_2');
+		
+		if (submodal2.length > 0) {
+			// step_to_track('1.1');
+			$.options.if_childmodal = 1;
 
-        if(submodal2.length > 0) {
-
-            $.options.if_childmodal = 1;
-            // call Preview to get content of params + tinymce. Finally, update #shortcode_content, Close Modal, call Preview of parents shortcode
-            // for sub modal child
-            $.HandleElement.rescanShortcode(curr_iframe, function(){
-                $.HandleElement.updateBeforeClose(null, window.parent.jQuery.noConflict()('#'+$.options.modal_settings.modalId));
-            });
-        }
-		else if( submodal.length > 0 ) {
-
-			// Advance shortcodes like Tabs, Accordion
-			$.HandleElement.updateBeforeClose();
+			// Call Preview to get content of params + tinymce. Finally, update #shortcode_content, Close Modal, call Preview of parents shortcode
+			$.HandleElement.rescanShortcode(curr_iframe, function() {
+				$.HandleElement.updateBeforeClose(window.parent.jQuery.noConflict()('#'+$.options.modal_settings.modalId), null, iframe_required);
+			});
+		} else if (submodal.length > 0) {
+			// step_to_track('1.2');
+			// Shortcodes like Tabs, Accordion
+			$.HandleElement.rescanShortcode(curr_iframe, function() {
+				$.HandleElement.updateBeforeClose();
+			});
 		} else {
-
+			// Sub shortcodes of Tabs, Accordion
 			if (contents.find('.submodal_frame').length) {
-
+				// step_to_track('1.3');
 				$.options.if_childmodal = 1;
 
 				// Call Preview to get content of params + tinymce. Finally, update #shortcode_content, Close Modal, call Preview of parents shortcode
 				$.HandleElement.rescanShortcode(curr_iframe, function() {
-					if (window.parent) {
-						$.HandleElement.finishCloseModal(curr_iframe, window.parent.jQuery.noConflict()('#' + $.options.modal_settings.modalId));
+					var selector, update_iframe;
+					selector = (window.parent) ? window.parent.jQuery.noConflict(): $;
+					if(iframe_required){
+						update_iframe = selector('#' + $.options.modal_settings.modalId);
 					} else {
-						$.HandleElement.finishCloseModal(curr_iframe, $('#' + $.options.modal_settings.modalId));
+						update_iframe = selector('.jsn-modal').first();
 					}
-				});
-            } else {
-				$.HandleElement.finishCloseModal(curr_iframe);
+					$.HandleElement.finishCloseModal(curr_iframe, update_iframe);
+				}, 'child element');
+			} else {
+				// step_to_track('1.4');
+        		$.HandleElement.finishCloseModal(curr_iframe);
 			}
 		}
 	},
@@ -894,28 +1103,53 @@
 	 * Parent shortcode like Tab, Accordion: Collect sub shortcodes
 	 * content and update to #shortecode_content before close
 	 */
-	$.HandleElement.updateBeforeClose = function(action_data, update_iframe) {
+	$.HandleElement.updateBeforeClose = function(update_iframe, rebuild_shortcode, iframe_required) {
 
-		if(action_data != null){
-			$.options.curr_iframe_ = window.parent.jQuery.noConflict()( '#' + $.options.modal_settings.modalId);
-		}
-		// get sub-shorcodes content
+		// Get sub-shorcodes content
 		var sub_items_content = [];
-		$.options.curr_iframe_.contents().find( "#modalOptions [name^='shortcode_content']" ).each(function() {
-			sub_items_content.push($(this).text());
-		})
+
+		if ( iframe_required ) {
+			$.options.curr_iframe_.contents().find( "#modalOptions [name^='shortcode_content']" ).each(function() {
+				sub_items_content.push($(this).text());
+			});
+		} else {
+			$( "#modalOptions [name^='shortcode_content']" ).each(function() {
+				sub_items_content.push($(this).text());
+			});
+		}
 		sub_items_content = sub_items_content.join('');
 
-		// update parent shortcode
-		var shortcode_content = $.options.curr_iframe_.contents().find( '#shortcode_content' ).text();
-
-		var arr = shortcode_content.split('][');
-		if(arr.length >= 2){
-			var data = arr[0] + ']' + sub_items_content + '[' + arr[arr.length - 1];
-			$.options.curr_iframe_.contents().find( '#shortcode_content' ).text(data);
-			$.HandleElement.finishCloseModal($.options.curr_iframe_, update_iframe, action_data);
+		var shortcode_content_obj;
+		if ( iframe_required ) {
+			shortcode_content_obj = $.options.curr_iframe_.contents().find( '#shortcode_content' );
 		} else {
-			$.HandleElement.finishCloseModal($.options.curr_iframe_, update_iframe, action_data);
+			shortcode_content_obj = $( '#shortcode_content' );
+		}
+
+		var	shortcode_content = shortcode_content_obj.text(),
+			arr = shortcode_content.split(']['),
+			before = $.HandleElement.selector(update_iframe, '.ig-pb-form-container .active-shortcode').first().outerHTML();
+
+		// step_to_track('2.5', shortcode_content);
+
+		if (arr.length >= 2) {
+			// Extract name & parameters of parent shortcode
+			var parent_sc_start = shortcode_content.replace('#_EDITTED', '').match(/\[[^\s"]+\s+([A-Za-z0-9_-]+=\"[^"\']*\"\s*)*\s*\]/);
+			var head_shortcode = parent_sc_start[0];
+			head_shortcode = head_shortcode.replace(']', '');
+
+			// step_to_track('2.6', parent_sc_start);
+
+            var data = head_shortcode + ']' + sub_items_content + '[' + arr[arr.length - 1];
+
+			// Update shortcode content
+			shortcode_content_obj.text(data);
+
+			// step_to_track(2, data);
+		}
+
+		if (!rebuild_shortcode) {
+			$.HandleElement.finishCloseModal($.options.curr_iframe_, update_iframe, before);
 		}
 	},
 
@@ -924,14 +1158,14 @@
 	 * has sub-shortcode) action_data: null (Save button) OR { 'convert' :
 	 * 'tab_to_accordion'}
 	 */
-	$.HandleElement.finishCloseModal = function(curr_iframe, update_iframe, action_data) {
+	$.HandleElement.finishCloseModal = function(curr_iframe, update_iframe, before) {
 		var	contents = curr_iframe.contents ? curr_iframe.contents() : curr_iframe,
-			shortcode_content = contents.find( '#shortcode_content' ).text();
+			shortcode_content = contents.find( '#shortcode_content' ).first().text();
 
 		// Trigger update shortcode for IG PageBuilder widget element
 		$('body').trigger('on_update_shortcode_widget', [shortcode_content]);
 
-		var in_sub_modal = window.parent && window.parent.jQuery.noConflict()('#jsn_view_modal_sub').length;
+		var in_sub_modal = ($('.ig-dialog').length == 2);
 
 		if (!top.addInClassic || in_sub_modal) {
 			var item_title = "", title_prepend, title_prepend_val = "";
@@ -940,7 +1174,8 @@
 				title_prepend = contents.find('[data-role="title_prepend"]');
 				title_prepend_val = '';
 
-				if (title_prepend.length) {
+				// Process append title_prepend with title
+				if (title_prepend.length && in_sub_modal) {
 					title_prepend = title_prepend.first();
 
 					var title_prepend_type = title_prepend.attr("data-title-prepend");
@@ -948,7 +1183,7 @@
 					title_prepend_val = title_prepend.val();
 
 					if (typeof(title_prepend_val) != "undefined" && Ig_Js_Html[title_prepend_type]) {
-						if(title_prepend.val() == '' && title_prepend_type == 'icon') {
+						if (title_prepend.val() == '' && title_prepend_type == 'icon') {
 							title_prepend_val = '';
 						} else {
 							title_prepend_val = ig_pb_remove_placeholder(Ig_Js_Html[title_prepend_type], 'standard_value', title_prepend.val());
@@ -964,49 +1199,61 @@
 				item_title = title_prepend.val();
 			}
 
-			item_title = item_title.replace(/\[/g,"").replace(/\]/g,"");
-
-			if ( !item_title ) {
-				item_title = Ig_Translate.no_title;
+			// Assign item_title use data-role=content instead data-role=title if it not exists
+			if ( ! contents.find('[data-role="title"]').length && contents.find('[data-role="content"]').length ) {
+				item_title = contents.find('[data-role="content"]').val();
 			}
 
-			$.HandleElement.updateActiveElement(update_iframe, shortcode_content, item_title, action_data);
+			if ( item_title ) {
+				item_title = item_title.replace(/\[/g,"").replace(/\]/g,"");
+			}
+
+			$.HandleElement.updateActiveElement(update_iframe, shortcode_content, item_title, before);
 		}
 
-		if (top.addInClassic || ! in_sub_modal) {
-			// update to textarea of Classdic Editor
+		if (top.addInClassic || !in_sub_modal) {
+			// Update to textarea of Classdic Editor
 
-			// inserts the shortcode into the active editor
+			// Inserts the shortcode into the active editor
 			if (typeof tinymce != 'undefined' && tinymce.activeEditor) {
 				tinymce.activeEditor.execCommand('mceInsertContent', 0, shortcode_content);
 			}
 
-			// closes Thickbox
+			// Close Thickbox
 			tb_remove();
 		}
+
+		$.HandleElement.finalize($.options.if_childmodal);
 
 		if ($.options.if_childmodal) {
 			// Update Tags of sub-element in Accordion
 			if ($("#modalOptions #shortcode_name").val() == "ig_accordion") {
 				$.HandleElement.extractParam("ig_accordion", "tag", "#ig_share_data");
 			}
-
+			// step_to_track(4, 'Rescan');
 			// Rescan sub-element shortcode of Parent element (Accordion, Tab...)
 			$.HandleElement.rescanShortcode();
 		}
-
-		$.HandleElement.finalize($.options.if_childmodal);
 	},
 
 	/**
 	 * Update to active element
 	 */
-	$.HandleElement.updateActiveElement = function(update_iframe, shortcode_content, item_title, action_data) {
-		var active_shortcode = $.HandleElement.selector(update_iframe,".ig-pb-form-container .active-shortcode");
-		var editted_flag_str = '#_EDITTED';
-		if(active_shortcode.hasClass('jsn-row-container'))
+	$.HandleElement.updateActiveElement = function(update_iframe, shortcode_content, item_title, before) {
+		// Check item_title is undefined
+		if ( typeof( item_title ) == 'undefined' || ! item_title )
+			item_title = Ig_Translate.no_title;
+
+		var	active_shortcode = $.HandleElement.selector(update_iframe,".ig-pb-form-container .active-shortcode").last(),
+			before = before || active_shortcode.outerHTML(),
+			editted_flag_str = '#_EDITTED';
+
+		if (active_shortcode.hasClass('jsn-row-container')) {
 			shortcode_content = shortcode_content.replace('[/ig_row]','');
+		}
+		// step_to_track(3, shortcode_content);
 		active_shortcode.find("[data-sc-info^='shortcode_content']").first().text(shortcode_content);
+		active_shortcode.find("[data-sc-info^='shortcode_content']").first().val(shortcode_content);
 
 		// update content to current active sub-element in group elements (Accordions, Tabs...)
 		var item_class = ($.options.if_childmodal) ? ".jsn-item-content" : ".ig-pb-element";
@@ -1022,62 +1269,45 @@
 			item_title = Ig_Translate.no_title;
 		active_shortcode.find(item_class).first().html(item_title);
 		// update content to current active Cell in Table
-		if(window.parent.jQuery.noConflict()( '#jsn_view_modal_sub').contents().find('#shortcode_name').val() == "ig_item_table"){
+		if(window.parent.jQuery.noConflict()( '.ui-dialog:last').contents().find('#shortcode_name').val() == "ig_item_table"){
 			var table = new $.IGTable();
 			table.init(active_shortcode);
 		}
 
 		var element_html = active_shortcode.html();
-		var action_;
-		if(action_data != null){
-			$.each(action_data, function(action, data){
-				action_ = action;
-				if(action == "convert")
-				{
-					var arr = data.split('_');
-					if(arr.length == 3)
-					{
-						var regexp = new RegExp("ig_"+arr[0], "g");
-						element_html = element_html.replace(regexp, "ig_"+arr[2]);
 
-						regexp = new RegExp("ig_item_"+arr[0], "g");
-						element_html = element_html.replace(regexp, "ig_item_"+arr[2]);
-						//Shortcode name in PageBuilder
-						regexp = new RegExp($.HandleElement.capitalize(arr[0]), "g");
-						element_html = element_html.replace(regexp, $.HandleElement.capitalize(arr[2]));
-						//"Convert to" button
-						regexp = new RegExp(Ig_Translate.convertText + arr[2], "g");
-						element_html = element_html.replace(regexp, Ig_Translate.convertText + arr[0]);
-					}
-
-				}
-			})
-
-		}
 		if (typeof(element_html) != 'undefined') {
 			// Remove editted flag
-			element_html	= element_html.replace(new RegExp(editted_flag_str, 'g'), '');
+			element_html = element_html.replace(new RegExp(editted_flag_str, 'g'), '');
 		}
+
 		active_shortcode.html(element_html);
-		// reopen Modal with Converted Shortcode
-		if(action_ == "convert")
-			active_shortcode.find(".element-edit").trigger('click', [true]);
-		else
-			active_shortcode.removeClass('active-shortcode');
+
+		// Trigger an event after editing an element
+		// State that this is a silent action if undo / redo
+		active_shortcode.addClass('silent_action');
+
+		if (window.parent) {
+			window.parent.jQuery(window.parent.document).trigger('ig_pb_after_edit_element', [active_shortcode, before]);
+		} else {
+			$(document).trigger('ig_pb_after_edit_element', [active_shortcode, before]);
+		}
+
+		active_shortcode.removeClass('active-shortcode');
+
 		$.HandleSetting.updateState(0);
+
 		// Hide Loading in Group elements
-		if ( $(active_shortcode).parents('#group_elements').length ) {
+		if ($(active_shortcode).parents('#group_elements').length) {
 			$(active_shortcode).parents('#group_elements').find('.jsn-item').last().find('.jsn-icon-loading').remove();
 		}
 
 		// Check if in Fullmode, then turn live preview on
-
 		if ($(active_shortcode).parents('.ig-pb-form-container.fullmode').length > 0) {
 			$.HandleElement.turnOnShortcodePreview(active_shortcode);
 		}
 
-
-		/* Update package attribute label common json */
+		// Update package attribute label common json
 		$('body').trigger('on_update_attr_label_common');
 		$('body').trigger('on_update_attr_label_setting');
 
@@ -1100,16 +1330,68 @@
 		// reset/update status
 		$.options.if_childmodal = 0;
 		$.PbDoing.addElement = 0;
-		$.PbDoing.editElement = 0;
+		$.options.current_shortcode = 0;
 
 		// remove overlay & loading
+		$.HandleElement.hideLoading(null, is_submodal);
 		if(!is_submodal) {
-			$.HandleElement.hideLoading();
 			$.HandleElement.removeModal();
 		}
 		$('.ig-pb-form-container').trigger('ig-pagebuilder-layout-changed');
+
+		// Do action : convert
+
+		var action_data = ($.PbDoing.action_data !== null) ? $.PbDoing.action_data : null;
+
+		if (action_data) {
+
+			if (action_data.action === 'convert')
+			{
+				$.HandleElement.convertTo(action_data);
+			}
+
+			// Reset value of data
+			$.PbDoing.action_data = null;
+		}
 	}
 
+	// Convert to another element
+	$.HandleElement.convertTo = function(action_data) {
+
+		var arr = action_data.relation.split('_');
+		var active_shortcode = $('.ig_to_convert');
+		var element_html = active_shortcode.html();
+
+		if (arr.length === 3)
+		{
+			var from_shortcode = arr[0];
+			var to_shortcode = arr[2];
+
+			// replace old shortcode tag by new shortcode tag
+			var regexp = new RegExp("ig_" + from_shortcode, "g");
+			element_html = element_html.replace(regexp, "ig_" + to_shortcode);
+
+			regexp = new RegExp("ig_item_" + from_shortcode, "g");
+			element_html = element_html.replace(regexp, "ig_item_" + to_shortcode);
+
+			// Update shortcode name in PageBuilder
+			regexp = new RegExp($.HandleElement.capitalize(from_shortcode), "g");
+			element_html = element_html.replace(regexp, $.HandleElement.capitalize(to_shortcode));
+
+			// Update text of "Convert to" button
+			regexp = new RegExp(Ig_Translate.convertText + to_shortcode, "g");
+			element_html = element_html.replace(regexp, Ig_Translate.convertText + from_shortcode);
+
+			// Update whole HTML of element
+			active_shortcode.html(element_html);
+		}
+
+		// Trigger click on edit button to open Setting Modal
+		setTimeout(function() {
+			active_shortcode.find(".element-edit").trigger('click', [true]);
+			active_shortcode.removeClass('ig_to_convert');
+		}, 300);
+	}
 
 	$.HandleElement.checkSelectMedia = function() {
 		$('body').delegate('#ig-select-media', 'change', function () {
@@ -1453,13 +1735,13 @@
 					ig_nonce_check : Ig_Ajax._nonce
 				},
 				function( data ) {
-					self_(data);
+					_self(data);
 				});
 		}
 		else
-			self_('');
+			_self('');
 
-		function self_(data){
+		function _self(data){
 			// remove current content of IG PageBuilder
 			$("#jsn-add-container").prevAll().remove();
 
@@ -1572,6 +1854,7 @@
  					}
  				}],
  				loaded: function (obj, iframe) {
+ 					$.HandleElement.disablePageScroll();
  				},
  				fadeIn:200,
  				scrollable: true,
@@ -1620,6 +1903,9 @@
 				},
 				function(response) {
 					$.HandleElement.hideLoading();
+					if ( response == 'error' ) {
+                		alert( Ig_Translate.layout.name_exist );
+                	}
 				}
 			);
 		});
@@ -1711,6 +1997,7 @@
 					}
 				}],
 				loaded: function (obj, iframe) {
+					$.HandleElement.disablePageScroll();
 				},
 			fadeIn:200,
 				scrollable: true,

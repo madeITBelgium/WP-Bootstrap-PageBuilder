@@ -132,7 +132,6 @@
 			$(this).jqte({blur: function(){
 				$(_this).trigger('change');
 			}});
-
 		});
 	}
 
@@ -328,6 +327,7 @@
 
 		if (group_elements.length) {
 			group_elements.sortable({
+				handle: '.element-drag',
 				stop: function( event, ui ) {
 					$.HandleSetting.shortcodePreview();
 
@@ -405,7 +405,7 @@
 		return $selector;
 	};
 
-	$.HandleSetting.shortcodePreview = function(params, shortcode, curr_iframe, callback, stop_reload_iframe) {
+	$.HandleSetting.shortcodePreview = function(params, shortcode, curr_iframe, callback, stop_reload_iframe, child_element) {
 		if (($.HandleSetting.selector(curr_iframe,"#modalOptions").length == 0 || $.HandleSetting.selector(curr_iframe,"#modalOptions").hasClass('submodal_frame')) && curr_iframe == null) {
 			return true;
 		}
@@ -423,7 +423,7 @@
 				// Widget
 				var form_serialize = $.HandleSetting.selector(curr_iframe, '#modalOptions #ig-widget-form' ).serialize();
 
-				$('input[type=checkbox]').each(function() {
+				$('input[type=checkbox]', '#modalOptions #ig-widget-form').each(function() {
 					if (!this.checked) {
 						form_serialize += '&'+this.name+'=0';
 					}
@@ -437,9 +437,9 @@
 
 				// Update TinyMCE content to #ig_share_data
 				window.parent.jQuery.noConflict()('#jsn_view_modal').contents().find('#ig_share_data').text(sc_content);
-
+				
 				// For shortcode which has sub-shortcode
-				if ($.HandleSetting.selector(curr_iframe,"#modalOptions").find('.has_submodal').length > 0) {
+				if ($.HandleSetting.selector(curr_iframe,"#modalOptions").find('.has_submodal').length > 0 || $.HandleSetting.selector(curr_iframe, '#modalOptions').find('.submodal_frame_2').length > 0) {
 					var sub_items_content = [];
 
 					$.HandleSetting.selector(curr_iframe, "#modalOptions [name^='shortcode_content']").each(function() {
@@ -454,9 +454,20 @@
 			shortcode_name = shortcode;
 			tmp_content = params;
 		}
-
+		
+		// step_to_track(5, tmp_content);
 		// Update shortcode content
-		$.HandleSetting.selector(curr_iframe, '#shortcode_content').text(tmp_content);
+		$.HandleSetting.selector(curr_iframe, '#shortcode_content').text(tmp_content).trigger('change');
+
+		if ( ! child_element ) {
+			// Update content of Shortcode tab
+			$('#shortcode_content', '#shortcode-content').text(tmp_content);
+		} else {
+			setTimeout( function() {
+				// Rescan parent shortcode, to update content of "Shortcode" tab
+				$.HandleElement.rescanShortcode();
+			}, 300 );
+		}
 
 		if (callback) {
 			callback();
@@ -506,10 +517,10 @@
                     }
 
                     if(
-                            $(this).parents(".tmce-active").length == 0 && !$(this).hasClass('tmce-active')
-                            && $(this).parents(".html-active").length == 0 && !$(this).hasClass('html-active')
-                            && !$(this).parents("[id^='parent-param']").hasClass( 'ig_hidden_depend' )
-                            && $(this).attr('id').indexOf('parent-') == -1
+						$(this).parents(".tmce-active").length == 0 && !$(this).hasClass('tmce-active')
+						&& $(this).parents(".html-active").length == 0 && !$(this).hasClass('html-active')
+						&& !$(this).parents("[id^='parent-param']").hasClass( 'ig_hidden_depend' )
+						&& $(this).attr('id').indexOf('parent-') == -1
                     )
                     {
                         var id = $(this).attr('id');
@@ -581,7 +592,7 @@
 
             }
         });
-
+		// step_to_track(6,tmp_content);
         tmp_content.push(']' + sc_content + '[/' + shortcode_name + ']');
         tmp_content	= tmp_content.join( ' ' );
 
@@ -744,7 +755,7 @@
 			return false;
 		}
 
-		$('#modalOptions').delegate(dp_selector, 'change', function() {
+		$('.ig-pb-form-container').delegate(dp_selector, 'change', function() {
 			var this_id = $(this).attr('id'), this_val	= $(this).val();
 
 			$.HandleSetting.toggleDependency(this_id, this_val);
@@ -753,18 +764,30 @@
 
 	// Show tab in Modal Options
 	$.HandleSetting.tab = function() {
-		$('#ig_option_tab a[href="#styling"]').on('click', function() {
-			if ($('#ig_previewing').val() == '1') {
-				return;
-			}
-
-			$('#ig_previewing').val('1');
-
-			$.HandleSetting.shortcodePreview();
-		});
-
 		if ($('.jsn-tabs').length && !$('.jsn-tabs').find("#Notab").length) {
 			$('.jsn-tabs').tabs();
+
+			$('#ig_option_tab a[data-toggle="tab"]').on('click', function() {
+				var href = $(this).attr('href');
+
+				if (href == '#shortcode-content') {
+					$('#shortcode_content').attr('disabled', 'disabled');
+				} else {
+					$('#shortcode_content').removeAttr('disabled');
+
+					if (href == '#styling') {
+						if ($('#ig_previewing').val() == '1') {
+							return;
+						}
+
+						$('#ig_previewing').val('1');
+
+						$.HandleSetting.shortcodePreview();
+					}
+				}
+			});
+
+			$('#shortcode_content').removeAttr('disabled');
 		}
 
 		return true;
@@ -846,7 +869,7 @@
 	// Handle icon change action in Modal box
 	$.HandleSetting.icons = function() {
 		// Icon type: handle icon click
-		$(".ig-pb-form-container").delegate("[data-type='ig-icon-item']", "click", function() {
+		$('body').on("click", ".ig-pb-form-container [data-type='ig-icon-item']", function() {
 			$(".controls .icon-selected").each(function() {
 				$(this).removeClass('icon-selected');
 			});
@@ -865,17 +888,20 @@
 	// Handle click action on Button in Modal: Convert action/ Add Row, Column / ...
 	$.HandleSetting.actionHandle = function() {
 		// Handle Convert To ... button
-		$(".ig_action_btn").delegate("a", "click", function(e) {
+		$('body').on("click", ".ig-pb-form-container .ig_action_btn a", function(e) {
 			e.preventDefault();
 
-			var action_type = $(this).attr('data-action-type'), action = $(this).attr('data-action');
+			var action_type = $(this).attr('data-action-type'), relation = $(this).attr('data-action');
 
-			if (action_type && action) {
-				var action_data = {};
+			if (action_type && relation) {
 
-				action_data[action_type] = action;
+				// Mark the element to be converted
+				$('.active-shortcode').addClass('ig_to_convert');
 
-				$.HandleElement.updateBeforeClose(action_data);
+				// Save data to convert
+				$.PbDoing.action_data = {'action': action_type, 'relation': relation};
+
+				$('button#selected', '.ig-dialog').trigger('click');
 			}
 		});
 	};
@@ -1052,6 +1078,11 @@
 				stop_reload_iframe = ((parent_tab.length > 0 && parent_tab.is("#styling")) || (parent_tab.length > 0 && parent_tab.is("#modalAction"))) ? 0 : 1;
 
 			$.HandleSetting.shortcodePreview(null, null, null, null, stop_reload_iframe);
+		});
+
+		// Trigger preview for parameters of Widget
+		$('#modalOptions #ig-widget-form').delegate('input, select, textarea', 'change', function() {
+			$.HandleSetting.shortcodePreview();
 		});
 
 		// Send Ajax request for loading shortcode html at first time

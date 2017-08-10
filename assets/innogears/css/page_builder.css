@@ -15,9 +15,34 @@
 
 #modalOptions {
     overflow: hidden;
+	display: block!important;
 }
 #modalOptions #ig_option_tab {
     border-radius: 0;
+}
+.ui-tabs-nav li{
+	display:inline-block;
+	border-top:1px solid #ddd;
+	border-left:1px solid #ddd;
+}
+.ui-tabs-nav li a{
+	display:inline-block;
+	padding:15px;
+	text-decoration:none;
+}
+.ui-tabs-nav li a:hover{
+	text-decoration:none;
+}
+.ui-tabs-nav li:last-child{
+	border-right:1px solid #ddd;
+}
+.ui-tabs-nav li.active{
+	border-bottom: 1px solid #fff;
+	margin-bottom: -1px !important;
+}
+.ui-tabs-nav{
+	border-bottom:1px solid #ddd;
+	margin-bottom:0!important;
 }
 #modalOptions #preview_container {
     max-height: 200px;
@@ -96,7 +121,7 @@
 #modalOptions .hide-element {
     display: none;
 }
-#modalOptions div[data-depend-element="param-ig_cl_source"] div.select2-container-multi, #modalOptions div[data-depend-element="param-ig_cl_source"] div.select2-container-multi ul.select2-choices{
+#modalOptions div.select2-container-multi, #modalOptions div.select2-container-multi ul.select2-choices{
     height: 60px !important;
     width: 100% !important;
 }
@@ -199,6 +224,13 @@
     -webkit-box-shadow: 0 -1px 0 0 #fff inset;
     -moz-box-shadow:    0 -1px 0 0 #fff inset;
     box-shadow:         0 -1px 0 0 #fff inset;
+	height:auto;
+	padding-top:0;
+	padding-bottom:0;
+}
+.ui-dialog .ui-dialog-title {
+    margin-bottom: 0;
+    margin-top: 0;
 }
 .ig-placeholder{
     opacity: 0.5;
@@ -312,7 +344,7 @@
     right: 100px;
 }
 .select2-drop{
-    z-index: 100051 !important;
+    z-index: 100053 !important;
 }
 .select2-drop-mask{
     max-width: 80%;
@@ -470,9 +502,21 @@
     position: relative !important;
 }
 
-.ig-add-element #rawshortcode-add {
-	width: 120px;
+.ig-add-element .rawshortcode-container {
+	width: 140px;
 	margin: 0 auto;
+}
+
+.ig-add-element .rawshortcode-container button {
+	width: 120px;
+	float:left;
+}
+
+.ig-add-element .rawshortcode-container i.jsn-icon-loading {
+	display: block !important;
+	float:left;
+	height: 32px;
+    margin-left: 4px;
 }
 
 /* === WIDGET === */
@@ -596,6 +640,15 @@ input:checked + .radio_image{
 }
 .jsn-modal-indicator{
     z-index: 200;
+}
+.jsn-modal-indicator + .jsn-modal-indicator {
+	z-index: 100052;
+}
+.jsn-modal-overlay + .jsn-modal-overlay {
+	z-index: 100052 !important;
+}
+.jsn-modal-indicator ~ .ig-dialog {
+	z-index: 100053 !important;
 }
 /* === REFINE === */
 .color_select2_item{
@@ -1016,6 +1069,9 @@ input:checked + .radio_image{
 .jsn-bootstrap3 .jsn-element-container {
 	min-height: 50px;
 }
+.jsn-bootstrap3 .jsn-element-container .jsn-item {
+	padding: 10px 10px 10px 0;
+}
 /* modal */
 .jsn-modal-overlay {
     background: none repeat scroll 0 0 #000000;
@@ -1182,7 +1238,7 @@ input:checked + .radio_image{
     float: left;
     margin-top: 5px;
 }
-.jsn-bootstrap3 .controls .jsn-items-list .jsn-item .jsn-item-content i {
+.jsn-bootstrap3 .controls .jsn-items-list .jsn-item .jsn-item-content i, .jsn-bootstrap3 .ig-pb-element span i {
     margin-right: 9px;
 }
 .jsn-bootstrap3 .jsn-iconselector .jsn-items-list .jsn-item:hover {
@@ -1394,7 +1450,7 @@ input:checked + .radio_image{
 
 /* Color Picker */
 .colorpicker {
-	z-index: 100051;
+	z-index: 100054;
 }
 /* for jquery-te editor field in modal setting */
 #modalOptions .jqte {
@@ -1608,11 +1664,42 @@ div[id^="collorpicker_"]{
 	font-size: 18px;
 	font-weight: bold;
 }
-#data-conversion-modal .modal-body {
-	padding-bottom: 20px;
-	text-align: center;
+#data-conversion-modal .modal-body input[type="checkbox"] {
+	margin-top: 1px;
 }
-#data-conversion-modal .modal-body span.ig-loading {
+#data-conversion-modal .modal-footer span.ig-loading {
 	padding-left: 20px;
 	background: url(../images/icons-16/icon-16-loading-circle.gif) 0 50% no-repeat;
+}
+
+.ig-overflow-hidden {
+	overflow: hidden;
+}
+.jsn-bootstrap3 .item-container-content .jsn-element:hover {
+	cursor: pointer;
+}
+.jsn-bootstrap3 .item-container-content .jsn-element .element-drag {
+	width: 26px;
+	height: 37px;
+	position: relative;
+	top: -11px;
+	display: block;
+	float:left;
+	background: url(../images/icons-16/icon-drag-anchor-mini.png) no-repeat scroll 8px center rgba(0, 0, 0, 0);
+	cursor: move;
+	text-decoration: none;
+}
+.jsn-bootstrap3 #group_elements .jsn-element {
+	padding: 4px 15px 8px 0px;
+}
+.jsn-bootstrap3 #group_elements .jsn-element .jsn-item-content {
+	margin-top: 0px;
+	line-height: 30px;
+}
+.jsn-bootstrap3 #group_elements .jsn-element .element-drag {
+	margin-top: 0px;
+	top: -4px;
+}
+.jsn-bootstrap3 .ig-display-block {
+	display: block !important;
 }

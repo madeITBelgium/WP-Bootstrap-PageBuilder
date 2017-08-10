@@ -33,8 +33,7 @@
             $('.ui-dialog .ui-dialog-content').css('height', height - 110)
 
             // adjust some elements
-            modalResize.resize($(window).width(), width, '#jsn_view_modal')
-            modalResize.resize($(window).width(), width, '#jsn_view_modal_sub')
+            modalResize.resize($(window).width(), width, '#jsn_view_modal');
         })
     })
 })(jQuery)

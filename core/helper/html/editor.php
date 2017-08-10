@@ -29,13 +29,23 @@ class IG_Pb_Helper_Html_Editor extends IG_Pb_Helper_Html {
 		$label = parent::get_label( $element );
 		$element['row'] = ( isset( $element['row'] ) ) ? $element['row'] : '8';
 		$element['col'] = ( isset( $element['col'] ) ) ? $element['col'] : '50';
-		if ( $element['exclude_quote'] == '1' ) {
-			$element['std'] = str_replace( '<ig_quote>', '"', $element['std'] );
-		}
-		$output = "<textarea class='{$element['class']} ig_pb_editor' id='{$element['id']}' rows='{$element['row']}' cols='{$element['col']}' name='{$element['id']}' DATA_INFO>{$element['std']}</textarea>";
+		//if ( $element['exclude_quote'] == '1' ) {
+		//	$element['std'] = str_replace( '<ig_quote>', '"', $element['std'] );
+		//}
+
+
+
+        if ( array_key_exists('mce', $element) ) {
+
+            if ( $element['mce'] == true ) $mce = true;
+            else $mce = false;
+
+        } else $mce = true;
+
+		$output = "<textarea class='{$element['class']} ".( $mce ? "ig_pb_editor" :  "")." ' id='{$element['id']}' rows='{$element['row']}' cols='{$element['col']}' name='{$element['id']}' DATA_INFO>{$element['std']}</textarea>";
 		
 		add_filter( 'ig_pb_assets_register_modal', array( __CLASS__, 'register_assets_register_modal' ) );
-		add_filter( 'ig_pb_assets_enqueue_modal', array( __CLASS__, 'enqueue_assets_modal' ) );
+		add_filter( 'ig-edit-element-required-assets', array( __CLASS__, 'enqueue_assets_modal' ), 9 );
 		
 		return parent::final_element( $element, $output, $label, true );
 	}
@@ -47,10 +57,12 @@ class IG_Pb_Helper_Html_Editor extends IG_Pb_Helper_Html {
 	 * @return array
 	 */
 	static function register_assets_register_modal( $assets ){
-		$assets['ig-pb-jquery-te-js'] = array(
+
+        $assets['ig-pb-jquery-te-js'] = array(
 			'src' => IG_Pb_Helper_Functions::path( 'assets/3rd-party/jquery-te' ) . '/jquery-te-1.4.0.min.js',
 			'ver' => '1.4.0',
 		);
+
 		$assets['ig-pb-jquery-te-css'] = array(
 			'src' => IG_Pb_Helper_Functions::path( 'assets/3rd-party/jquery-te' ) . '/jquery-te-1.4.0.css',
 			'ver' => '1.4.0',

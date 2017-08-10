@@ -171,7 +171,7 @@ class IG_Init_Admin_Menu {
 				// Calculate menu position
 				if ( ! isset( $entry['position'] ) || empty( $entry['position'] ) ) {
 					if ( ! isset( $position ) ) {
-						$position = 50;
+						eval( '$position = 50.' . rand( 100, 1000 ) . ';' );
 					} else {
 						$position++;
 					}
@@ -184,7 +184,7 @@ class IG_Init_Admin_Menu {
 					$entry['menu_slug'],
 					( isset( $entry['function'] ) && ! empty( $entry['function'] ) ) ? $entry['function'] : '',
 					( isset( $entry['icon_url'] ) && ! empty( $entry['icon_url'] ) ) ? $entry['icon_url'] : '',
-					( isset( $entry['position'] ) && ! empty( $entry['position'] ) ) ? $entry['position'] : $position
+					( isset( $entry['position'] ) && ! empty( $entry['position'] ) ) ? "{$entry['position']}" : "{$position}"
 				);
 			}
 		}

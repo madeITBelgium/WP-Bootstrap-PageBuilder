@@ -44,7 +44,7 @@ class IG_Progressbar extends IG_Pb_Shortcode_Parent {
 		$this->config['exception'] = array(
 			'default_content'  => __( 'Progress Bar', IGPBL ),
 			'data-modal-title' => __( 'Progress Bar', IGPBL ),
-			
+
 			'admin_assets' => array(
 				// Shortcode initialization
 				'progressbar.js',
@@ -63,8 +63,8 @@ class IG_Progressbar extends IG_Pb_Shortcode_Parent {
 			),
 		);
 
-		// Do not use Ajax to load element settings modal because this element has sub-item
-		$this->config['edit_using_ajax'] = false;
+		// Use Ajax to speed up element settings modal loading speed
+		$this->config['edit_using_ajax'] = true;
 	}
 
 	/**
@@ -94,7 +94,6 @@ class IG_Progressbar extends IG_Pb_Shortcode_Parent {
 						array( 'std' => __( '', IGPBL ) ),
 						array( 'std' => __( '', IGPBL ) ),
 					),
-					'label_item' => 'Progress bar ',
 				),
 			),
 			'styling' => array(
@@ -198,6 +197,17 @@ class IG_Progressbar extends IG_Pb_Shortcode_Parent {
 			$pattern   = '\\[(\\[?)(sub_content)(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*+(?:\\[(?!\\/\\2\\])[^\\[]*+)*+)\\[\\/\\2\\])?)(\\]?)';
 			$sub_htmls = preg_replace( "/$pattern/s", '', $sub_htmls );
 		}
+		$script = '<script type="text/javascript">
+	(function($) {
+		$(document).ready(function() {
+			$(".progress-bar" ).each(function () {
+				bar_width = $(this).attr("aria-valuenow");
+
+				$(this).width(bar_width + "%");
+			});
+		});
+	})(jQuery);
+</script>';
 		if ( $arr_params['progress_bar_style'] == 'stacked' ) {
 			$sub_htmls   = str_replace( '{active}', '', $sub_htmls );
 			$active      = ( $arr_params['progress_bar_stack_active'] == 'yes' ) ? ' progress-striped active' : '';
@@ -232,7 +242,7 @@ class IG_Progressbar extends IG_Pb_Shortcode_Parent {
 			$html_element = $sub_htmls;
 		}
 
-		return $this->element_wrapper( $html_element, $arr_params );
+		return $this->element_wrapper( $html_element . $script, $arr_params );
 	}
 }
 

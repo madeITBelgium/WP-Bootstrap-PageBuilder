@@ -23,7 +23,8 @@ if ( ! class_exists( 'IG_Item_List' ) ) {
 		public function element_config() {
 			$this->config['shortcode'] = strtolower( __CLASS__ );
 			$this->config['exception'] = array(
-				'data-modal-title' => __( 'List Item', IGPBL )
+				'data-modal-title' => __( 'List Item', IGPBL ),
+
 			);
 		}
 
@@ -51,6 +52,27 @@ if ( ! class_exists( 'IG_Item_List' ) ) {
 						'tooltip' => __( 'Set content of element', IGPBL )
 					),
 					array(
+						'name'    => __( 'Add Button Text', 'plumtree'),
+						'id'      => 'button_list_text',
+						'type'    => 'text_field',
+						'class'   => 'jsn-input-xxlarge-fluid',
+						'std'     => '',
+					),
+					array(
+						'name'    => __( 'Add Source Button', 'plumtree'),
+						'id'      => 'button_list_text_source',
+						'type'    => 'text_field',
+						'class'   => 'jsn-input-xxlarge-fluid',
+						'std'     => '',
+					),
+					array(
+						'name'       => __( 'Vertical Alignment Icon', 'plumtree' ),
+						'id'         => 'vertical_alignment_icon',
+						'type'       => 'radio',
+						'std'        => 'middle',
+						'options'    => array( 'top' => __( 'Top', 'plumtree' ), 'middle' => __( 'Middle', 'plumtree' ), 'bottom' => __( 'Bottom', 'plumtree' ) ),
+					),
+					array(
 						'name'      => __( 'Icon', IGPBL ),
 						'id'        => 'icon',
 						'type'      => 'icons',
@@ -72,16 +94,20 @@ if ( ! class_exists( 'IG_Item_List' ) ) {
 		public function element_shortcode_full( $atts = null, $content = null ) {
 			extract( shortcode_atts( $this->config['params'], $atts ) );
             IG_Pb_Helper_Functions::heading_icon( $heading, $icon, true );
+			if ($button_list_text!==''){
+				$button_list='<a class="button-list" href="'.$button_list_text_source.'">'.$button_list_text.'</a>';
+			}
 			return "
 			<li>
 				[icon]<div class='ig-sub-icons' style='ig-styles'>
-					<i class='$icon'></i>
+					<i class='$icon' style='vertical-align:$vertical_alignment_icon'></i>
 				</div>[/icon]
 				<div class='ig-list-content-wrap'>
 					[heading]<h4 style='ig-list-title'>$heading</h4>[/heading]
 					<div class='ig-list-content'>
 						$content
 					</div>
+					$button_list
 				</div>
 			</li><!--seperate-->";
 		}

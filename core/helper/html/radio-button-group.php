@@ -19,16 +19,14 @@ class IG_Pb_Helper_Html_Radio_Button_Group extends IG_Pb_Helper_Html {
 		$element = parent::get_extra_info( $element );
 		$label   = parent::get_label( $element );
 
-		$output = "<div class='btn-group ig-btn-group' data-toggle='buttons-radio'>";
+		$output = "<div class='btn-group ig-btn-group' data-toggle='buttons'>";
 		foreach ( $element['options'] as $key => $text ) {
 			$active  = ( $key == $element['std'] ) ? 'active' : '';
-			$output .= "<button type='button' class='btn btn-icon $active' data-value='$key'><i class='ig-btn-$key'>$text</i></button>";
-		}
-		$output .= '</div>';
-		$output .= "<div class='radio-group ig-btn-radio hidden'>";
-		foreach ( $element['options'] as $key => $text ) {
 			$checked = ( $key == $element['std'] ) ? 'checked' : '';
+			$output .= "<label class='btn btn-default {$active}'>";
 			$output .= "<input type='radio' name='{$element['id']}' $checked id='{$element['id']}' value='$key'/>";
+			$output .= $text;
+			$output .= "</label>";
 		}
 		$output .= '</div>';
 

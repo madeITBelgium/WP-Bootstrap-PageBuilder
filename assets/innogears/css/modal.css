@@ -93,3 +93,8 @@
 .group-table table {
     margin-bottom: 0 !important;
 }
+
+/* === Woocommerce Css === */
+select#param-woo_product_filter{
+    display: none;
+}

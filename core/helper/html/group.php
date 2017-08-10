@@ -17,7 +17,7 @@ class IG_Pb_Helper_Html_Group extends IG_Pb_Helper_Html {
 	 *
 	 * @return string
 	 */
-	static function render( $element ) {
+	static function render( $element ) {		
 		$_element                 = $element;
 		$label_item               = ( isset( $element['label_item'] ) ) ? $element['label_item'] : '';
 		$add_item                 = isset( $element['add_item_text'] ) ? $element['add_item_text'] : __( 'Add Item', IGPBL );
@@ -26,12 +26,14 @@ class IG_Pb_Helper_Html_Group extends IG_Pb_Helper_Html {
 		$sub_item_type            = $element['sub_item_type'];
 		$items_html               = array();
 		$shortcode_name           = str_replace( 'IG_', '', $element['shortcode'] );
+		
 		if ( $sub_items ) {
 			foreach ( $sub_items as $idx => $item ) {
 				$element = new $sub_item_type();
+				$element->init_element();
 				// check if $item['std'] is empty or not
 				$shortcode_data = '';
-				
+
 				if ( ! $label_item ) {
 					$content = __( $shortcode_name, IGPBL ) . ' ' . __( 'Item', IGPBL ) . ' ' . ( $idx + 1 );
 				} else {
@@ -40,13 +42,15 @@ class IG_Pb_Helper_Html_Group extends IG_Pb_Helper_Html {
 				if ( isset( $_element['no_title'] ) ) {
 					$content = $_element['no_title'];
 				}
-
 				if ( ! empty( $item['std'] ) ) {
 					// keep shortcode data as it is
 					$shortcode_data = $item['std'];
+					
 					// reassign params for shortcode base on std string
 					$extract_params = IG_Pb_Helper_Shortcode::extract_params( ( $item['std'] ) );
+					
 					$params         = IG_Pb_Helper_Shortcode::generate_shortcode_params( $element->items, NULL, $extract_params, TRUE, FALSE, $content );
+					
 					$element->shortcode_data();
 					$params['extract_title'] = empty ( $params['extract_title'] ) ? __( '(Untitled)', IGPBL ) : $params['extract_title'];
 					$content                 = $params['extract_title'];
@@ -69,7 +73,7 @@ class IG_Pb_Helper_Html_Group extends IG_Pb_Helper_Html {
 					<ul $style class='ui-sortable jsn-items-list item-container-content jsn-rounded-medium' id='group_elements'>
 						$items_html
 					</ul>
-					<a href='javascript:void(0);' class='jsn-add-more ig-more-element' data-shortcode-item='" . strtolower( $sub_item_type ) . "'><i class='icon-plus'></i>" . __( $add_item, IGPBL ) . '</a>
+					<a href='javascript:void(0);' class='jsn-add-more ig-more-element' item_common_title='" . __( $shortcode_name, IGPBL ) . ' ' . __( 'Item', IGPBL ) . "' data-shortcode-item='" . strtolower( $sub_item_type ) . "'><i class='icon-plus'></i>" . __( $add_item, IGPBL ) . '</a>
 				</div></div>';
 
 		return $html_element;

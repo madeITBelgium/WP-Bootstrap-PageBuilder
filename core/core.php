@@ -31,8 +31,20 @@ class IG_Pb_Core {
 	 */
 	function __construct() {
 		$this->ig_elements = array();
-		$this->register_element();
-		$this->register_widget();
+
+		global $pagenow;
+		if (
+				'post.php' == $pagenow || 'post-new.php' == $pagenow // Post editing page
+				|| 'widgets.php' == $pagenow                         // Widget page, for IG Page Element Widget
+				|| $_GET['ig-gadget'] != ''                          // IG Gadet
+				|| ( defined( 'DOING_AJAX' ) && DOING_AJAX )         // Ajax page
+				|| ! is_admin()                                      // Front end
+		)
+		{
+				$this->register_element();
+				$this->register_widget();
+		}
+
 		$this->custom_hook();
 	}
 
@@ -74,6 +86,7 @@ class IG_Pb_Core {
 		add_filter( 'the_content', array( &$this, 'pagebuilder_to_frontend' ), 9 );
 		add_filter( 'the_content', 'do_shortcode' );
 		remove_filter( 'the_excerpt', 'wpautop' );
+		remove_filter( 'the_content', 'wpautop' );
 
 		// enqueue js for front-end
 		add_action( 'wp_enqueue_scripts', array( &$this, 'frontend_scripts' ) );
@@ -97,6 +110,8 @@ class IG_Pb_Core {
 		add_action( 'wp_ajax_shortcode_extract_param', array( &$this, 'shortcode_extract_param' ) );
 		add_action( 'wp_ajax_get_json_custom', array( &$this, 'ajax_json_custom' ) );
 		add_action( 'wp_ajax_get_shortcode_tpl', array( &$this, 'get_shortcode_tpl' ) );
+		add_action( 'wp_ajax_get_default_shortcode_structure', array( &$this, 'get_default_shortcode_structure' ) );
+
 		add_action( 'wp_ajax_text_to_pagebuilder', array( &$this, 'text_to_pagebuilder' ) );
 		add_action( 'wp_ajax_get_html_content', array( &$this, 'get_html_content' ) );
 		add_action( 'wp_ajax_get_same_elements', array( &$this, 'get_same_elements' ) );
@@ -106,12 +121,13 @@ class IG_Pb_Core {
 
 		// print html template of shortcodes
 		add_action( 'admin_footer', array( &$this, 'element_tpl' ) );
-		add_filter( 'tiny_mce_before_init', array( &$this, 'tinymce_before_init' ) );
 		add_filter( 'wp_handle_upload_prefilter', array( &$this, 'media_file_name' ), 100 );
 
 		// add IGPB button to Wordpress TinyMCE
 		add_filter( 'mce_external_plugins', array( &$this, 'filter_mce_plugin' ) );
-		add_action( 'media_buttons_context',  array( &$this, 'add_page_element_button' ) );
+		//if ( $this->check_support() ) {
+			add_action( 'media_buttons_context',  array( &$this, 'add_page_element_button' ) );
+		//}
 
 		// Remove Gravatar from Ig Modal Pages
 		if ( is_admin() ) {
@@ -233,19 +249,30 @@ class IG_Pb_Core {
 	 * Add IG PageBuilder Metaboxes
 	 */
 	function custom_meta_boxes() {
-		if ( $this->check_support() ) {
+		//if ( $this->check_support() ) {
 			add_meta_box(
 				'ig_page_builder',
 				__( 'Page Builder', IGPBL ),
 				array( &$this, 'page_builder_html' )
 			);
-		}
+		//}
 	}
 
 	/**
 	 * Content file for IG PageBuilder Metabox
 	 */
 	function page_builder_html() {
+		// Get available data converters
+		$converters = IG_Pb_Converter::get_converters();
+
+		if ( @count( $converters ) ) {
+			// Load script initialization for data conversion
+			IG_Init_Assets::load( 'ig-pb-convert-data-js' );
+		}
+
+		// Load script initialization for undo / redo action
+		IG_Init_Assets::load( 'ig-pb-activity-js' );
+
 		include IG_PB_TPL_PATH . '/page-builder.php';
 	}
 
@@ -263,7 +290,7 @@ class IG_Pb_Core {
 				$class   = IG_Pb_Helper_Shortcode::get_shortcode_class( $name );
 				$element = new $class();
 				$this->set_element( $type, $class, $element );
-				$this->register_sub_el( $class, 1 );
+//				$this->register_sub_el( $class, 1 );
 			}
 		}
 	}
@@ -305,8 +332,7 @@ class IG_Pb_Core {
 		foreach ( $elements as $type_list ) {
 			foreach ( $type_list as $element ) {
 				// Get element type
-				$element_type = $element->element_in_pgbldr();
-
+				$element_type = $element->element_in_pgbldr( null, null, null, null, false);
 				// Print template tag
 				foreach ( $element_type as $element_structure ) {
 					echo balanceTags( "<script type='text/html' id='tmpl-{$element->config['shortcode']}'>\n{$element_structure}\n</script>\n" );
@@ -331,7 +357,7 @@ class IG_Pb_Core {
 				$element->config['el_type']             = $type;
 
 				// Get element type
-				$element_type = $element->element_in_pgbldr( $content );
+				$element_type = $element->element_in_pgbldr( null, null, null, null, false);
 
 				// Print template tag
 				foreach ( $element_type as $element_structure ) {
@@ -369,72 +395,57 @@ class IG_Pb_Core {
 	}
 
 	/**
-	 * Hook before tinymce init
-     *
-	 * @param array $initArray
-	 * @return type
-	 */
-	function tinymce_before_init( $initArray ) {
-		$initArray['setup'] = <<<JS
-[function(ed) {
-	ed.onChange.add( function(ed, l ) {
-		jQuery( '.mceEditor' ).each(function (){
-			var tiny_iframe	= jQuery( this ).find( 'iframe' );
-			var _param_id	= tiny_iframe.attr( 'id' ).replace( '_ifr', '' );
-			var _param		= jQuery( '#' + _param_id );
-			_param.text( l.content ).val( l.content );
-			jQuery( '#ig-tinymce-change' ).val( '1' );
-		});
-	});
-}][0]
-JS;
-		return $initArray;
-	}
-
-	/**
 	 * Save IG PageBuilder shortcode content of a post/page
      *
 	 * @param int $post_id
 	 * @return type
 	 */
 	function save_pagebuilder_content( $post_id ) {
-		if ( ! current_user_can( 'edit_page', $post_id ) )
+		if ( ! current_user_can( 'edit_page', $post_id ) ) {
 			return;
+		}
 
-		if ( ! isset($_POST[IGNONCE . '_builder'] ) || ! wp_verify_nonce( $_POST[IGNONCE . '_builder'], 'ig_builder' ) )
+		if ( ! isset($_POST[IGNONCE . '_builder'] ) || ! wp_verify_nonce( $_POST[IGNONCE . '_builder'], 'ig_builder' ) ) {
 			return;
+		}
 
-		$ig_deactivate_pb = intval( mysql_real_escape_string( $_POST['ig_deactivate_pb'] ) );
+		$ig_deactivate_pb = intval( esc_sql( $_POST['ig_deactivate_pb'] ) );
 
 		if ( $ig_deactivate_pb ) {
 			IG_Pb_Utils_Common::delete_meta_key( array( '_ig_page_builder_content', '_ig_html_content', '_ig_page_active_tab', '_ig_post_view_count' ), $post_id );
 		} else {
-			$ig_active_tab = intval( mysql_real_escape_string( $_POST['ig_active_tab'] ) );
+			$ig_active_tab = intval( esc_sql( $_POST['ig_active_tab'] ) );
 			$post_content  = '';
 
 			// IG PageBuilder is activate
 			if ( $ig_active_tab ) {
 				$data = array();
+
 				if ( isset( $_POST['shortcode_content'] ) && is_array( $_POST['shortcode_content'] ) ) {
 					foreach ( $_POST['shortcode_content'] as $shortcode ) {
 						$data[] = trim( stripslashes( $shortcode ) );
 					}
-				} else
+				} else {
 					$data[] = '';
+				}
 
-				$post_content = ( implode( '', $data ) );
-				$post_content = IG_Pb_Utils_Placeholder::remove_placeholder( $post_content, 'wrapper_append', '' );
+				$post_content = IG_Pb_Utils_Placeholder::remove_placeholder( implode( '', $data ), 'wrapper_append', '' );
 
+				// update post meta
 				update_post_meta( $post_id, '_ig_page_builder_content', $post_content );
 				update_post_meta( $post_id, '_ig_html_content', IG_Pb_Helper_Shortcode::doshortcode_content( $post_content ) );
-				update_post_meta( $post_id, '_ig_page_active_tab', $ig_active_tab );
 			}
 			else {
 				$content = stripslashes( $_POST['content'] );
 				/// remove this line? $content = apply_filters( 'the_content', $content );
 				$post_content = $content;
 			}
+
+			// update current active tab
+			update_post_meta( $post_id, '_ig_page_active_tab', $ig_active_tab );
 		}
+
+		// update whether or not deactive pagebuilder
 		update_post_meta( $post_id, '_ig_deactivate_pb', $ig_deactivate_pb );
 	}
 
@@ -452,7 +463,7 @@ JS;
 			if ( ! isset($_GET[IGNONCE] ) || ! wp_verify_nonce( $_GET[IGNONCE], IGNONCE ) )
 				return;
 
-			$shortcode = mysql_real_escape_string( $_GET['ig_shortcode_name'] );
+			$shortcode = esc_sql( $_GET['ig_shortcode_name'] );
 			$params    = urldecode( $_POST['params'] );
 			$pattern   = '/^\[ig_widget/i';
 			if ( ! preg_match( $pattern, trim( $params ) ) ) {
@@ -466,7 +477,7 @@ JS;
 				if ( ! is_object( $element ) )
 					$element = new $class();
 
-				if ( $_POST['params'] ) {
+				if ( $params ) {
 					$extract_params = IG_Pb_Helper_Shortcode::extract_params( $params, $shortcode );
 				} else {
 					$extract_params = $element->config;
@@ -478,8 +489,7 @@ JS;
 				$content = $element->element_shortcode( $extract_params, $_shortcode_content );
 			} else {
 				$class = 'IG_Widget';
-				$content  = '<script type="text/javascript">jQuery.noConflict();</script>';
-				$content .= IG_Pb_Helper_Shortcode::widget_content( array( $params ) );
+				$content = IG_Pb_Helper_Shortcode::widget_content( array( $params ) );
 			}
 			global $Ig_Pb_Preview_Class;
 			$Ig_Pb_Preview_Class = $class;
@@ -542,45 +552,21 @@ JS;
 	}
 
 	/**
-	 * GET <script type='text/html'... template for shortcode element
-     *
-	 * @global type $Ig_Pb_Widgets
-	 * @return string
+	 * Get shortcode structure with default attributes
+	 * eg: [ig_text title="The text"]Lorem ipsum[/ig_text]
+	 * Enter description here ...
 	 */
-	function get_shortcode_tpl() {
+	function get_default_shortcode_structure() {
 		if ( ! isset($_POST[IGNONCE] ) || ! wp_verify_nonce( $_POST[IGNONCE], IGNONCE ) )
 			return;
-
 		if ( ! $_POST['shortcode'] )
 			return;
 		$shortcode = $_POST['shortcode'];
-		$type      = $_POST['type'];
-		$elements  = $this->get_elements();
-		if ( $type == 'element' ) {
-			if ( isset( $elements['element'][strtolower( $shortcode )] ) && is_object( $elements['element'][strtolower( $shortcode )] ) ) {
-				$element = $elements['element'][strtolower( $shortcode )];
-			} else {
-				$class   = IG_Pb_Helper_Shortcode::get_shortcode_class( $shortcode );
-				$element = new $class();
-			}
-			$element->shortcode_data();
-			$element_type = $element->element_in_pgbldr();
-			foreach ( $element_type as $element_structure ) {
-				echo balanceTags( "<script type='text/html' id='tmpl-{$shortcode}'>\n{$element_structure}\n</script>\n" );
-			}
-		} else {
-			$shortcode = mysql_real_escape_string( $shortcode );
-			$element   = new IG_Widget();
-			global $Ig_Pb_Widgets;
-			$modal_title = $Ig_Pb_Widgets[$shortcode]['identity_name'];
-			$element->config['shortcode'] = $shortcode;
-			$content = $element->config['exception']['data-modal-title'] = $modal_title;
-			$element->config['shortcode_structure'] = IG_Pb_Utils_Placeholder::add_placeholder( "[ig_widget widget_id=\"$shortcode\"]%s[/ig_widget]", 'widget_title' );
-			$element->config['el_type'] = $type;
-			$element_type = $element->element_in_pgbldr( $content );
-			foreach ( $element_type as $element_structure ) {
-				echo balanceTags( "<script type='text/html' id='tmpl-{$shortcode}'>\n{$element_structure}\n</script>\n" );
-			}
+		$class     = IG_Pb_Helper_Shortcode::get_shortcode_class( $shortcode );
+		if ( class_exists( $class ) ) {
+			$element   = new $class();
+			$element->init_element();
+			echo $element->config['shortcode_structure'];
 		}
 
 		exit;
@@ -626,9 +612,13 @@ JS;
 	function pagebuilder_to_frontend( $content ) {
 		global $post;
 
+		// Get what tab (Classic - Pagebuilder) is active when Save content of this post
+		$ig_page_active_tab = get_post_meta( $post->ID, '_ig_page_active_tab', true );
+
 		$ig_deactivate_pb = get_post_meta( $post->ID, '_ig_deactivate_pb', true );
-		// if not deactivate pagebuilder on this post
-		if ( empty( $ig_deactivate_pb ) ) {
+
+		// if Pagebuilder is active when save and pagebuilder is not deactivate on this post
+		if ( $ig_page_active_tab && empty( $ig_deactivate_pb ) ) {
 			$ig_pagebuilder_content = get_post_meta( $post->ID, '_ig_page_builder_content', true );
 			if ( ! empty( $ig_pagebuilder_content ) ) {
 				// remove placeholder text which was inserted to &lt; and &gt;
@@ -685,7 +675,7 @@ JS;
 		global $pagenow, $post;
 
 		if ( 'post.php' == $pagenow || 'post-new.php' == $pagenow || 'widgets.php' == $pagenow ) {
-			if ( 'widgets.php' != $pagenow ) {
+			if ( 'widgets.php' != $pagenow && ! empty( $post->ID ) ) {
 				// Check if IG PageBuilder is enabled for this post type
 				$settings  = IG_Pb_Product_Plugin::ig_pb_settings_options();
 				$post_type = get_post_type( $post->ID );
@@ -713,7 +703,7 @@ JS;
 	 * @return  void
 	 */
 	function load_assets() {
-		if ( $this->check_support() ) {
+		//if ( $this->check_support() ) {
 			// Load styles
 			IG_Pb_Helper_Functions::enqueue_styles();
 
@@ -724,7 +714,7 @@ JS;
 			IG_Init_Assets::load( apply_filters( 'ig_pb_assets_enqueue_admin', $scripts ) );
 
 			IG_Pb_Helper_Functions::enqueue_scripts_end();
-		}
+		//}
 	}
 
 	/**
@@ -889,20 +879,19 @@ JS;
      */
 	function hook_after_title() {
 		global $post;
-
 		if ( $this->check_support() ) {
 			$ig_pagebuilder_content = get_post_meta( $post->ID, '_ig_page_builder_content', true );
-
+	
 			// Get active tab
 			$ig_page_active_tab = get_post_meta( $post->ID, '_ig_page_active_tab', true );
 			$tab_active         = isset( $ig_page_active_tab ) ? intval( $ig_page_active_tab ) : ( ! empty( $ig_pagebuilder_content ) ? 1 : 0 );
-
+	
 			// Deactivate pagebuilder
 			$ig_deactivate_pb = get_post_meta( $post->ID, '_ig_deactivate_pb', true );
 			$ig_deactivate_pb = isset( $ig_deactivate_pb ) ? intval( $ig_deactivate_pb ) : 0;
-
+	
 			$wrapper_style = $tab_active ? 'style="display:none"' : '';
-
+			
 			echo '
                 <input id="ig_active_tab" name="ig_active_tab" value="' . $tab_active . '" type="hidden">
                 <input id="ig_deactivate_pb" name="ig_deactivate_pb" value="' . $ig_deactivate_pb . '" type="hidden">
@@ -924,6 +913,8 @@ JS;
 	function hook_after_editor() {
 		if ( $this->check_support() ) {
 			echo '</div><div class="tab-pane" id="ig_editor_tab2"><div id="ig_before_pagebuilder"></div></div></div></div>';
+		} else {
+			echo '<div class="tab-pane" id="ig_editor_tab2" style="display:none"><div id="ig_before_pagebuilder"></div></div>';
 		}
 	}
 
@@ -1012,7 +1003,7 @@ JS;
 
 		$error = IG_Pb_Helper_Layout::save_premade_layouts( $layout_name, $layout_content );
 
-		echo intval( $error ) ? _( 'Template name exists. Please choose another one.' ) : _( 'Saved successfully.' );
+		echo intval( $error ) ? 'error' : 'success';
 
 		exit;
 	}

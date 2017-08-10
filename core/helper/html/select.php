@@ -48,7 +48,7 @@ class IG_Pb_Helper_Html_Select extends IG_Pb_Helper_Html {
 			}
 		}
 
-		add_filter( 'ig_pb_assets_enqueue_modal', array( __CLASS__, 'enqueue_assets_modal' ) );
+		add_filter( 'ig-edit-element-required-assets', array( __CLASS__, 'enqueue_assets_modal' ), 9 );
 
 		return parent::final_element( $element, $output, $label );
 	}

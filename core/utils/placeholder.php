@@ -27,7 +27,7 @@ class IG_Pb_Utils_Placeholder {
 	static function add_placeholder( $string, $placeholder, $expression = '' ){
 		global $placeholders;
 		if ( ! isset( $placeholders[$placeholder] ) )
-			return NULL;
+			return NULL;		
 		if ( empty( $expression ) )
 			return sprintf( $string, $placeholders[$placeholder] );
 		else

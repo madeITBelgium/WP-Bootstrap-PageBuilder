@@ -75,8 +75,9 @@ if ( ! class_exists( 'IG_Column' ) ) {
 			$style   = empty( $style ) ? '' : "style='$style'";
 			$span    = intval( substr( $span, 4 ) );
 			$span_sm = intval( $span * 3 / 2 );
-			$class   = "col-md-$span col-sm-$span_sm";
-			return '<div class="' . $class . '" ' . $style . '>' . IG_Pb_Helper_Shortcode::remove_autop( $content ) . '</div>';
+			if (BOOTSTRAP_VERSION == 2) $class   = "span$span";
+            else $class   = "col-md-$span col-sm-$span_sm";
+			return '<div class="' . $class . '" >' . IG_Pb_Helper_Shortcode::remove_autop( $content ) . '</div>';
 		}
 
 	}

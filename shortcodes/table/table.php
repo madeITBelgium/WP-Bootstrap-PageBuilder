@@ -44,7 +44,7 @@ class IG_Table extends IG_Pb_Shortcode_Parent {
 		$this->config['exception'] = array(
 			'admin_assets' => array(
 				// Shortcode initialization
-				'item_table.js',
+				'table.js',
 			),
 
 			'frontend_assets' => array(
@@ -55,7 +55,7 @@ class IG_Table extends IG_Pb_Shortcode_Parent {
 		);
 
 		// Do not use Ajax to load element settings modal because this element has sub-item
-		$this->config['edit_using_ajax'] = false;
+		$this->config['edit_using_ajax'] = true;
 	}
 
 	/**

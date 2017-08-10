@@ -25,7 +25,7 @@
 	display: inline-block;
 	min-width: 16px;
 	min-height: 16px;
-	background: url(../../3rd-party/jsn/images/icons-16/icon-16-loading-circle.gif) 0 50% no-repeat !important;
+	background: url(../../3rd-party/bs2/jsn/images/icons-16/icon-16-loading-circle.gif) 0 50% no-repeat !important;
 	color: #333333 !important;
 }
 .modal-footer .ig-loading,

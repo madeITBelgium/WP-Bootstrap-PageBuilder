@@ -716,15 +716,16 @@ if ( ! class_exists( 'IG_Pb_Helper_Type' ) ) {
 		 *
 		 * @return array
 		 */
-		static function get_single_entries_ctl( $check_val, $attrs ) {
+		static function get_single_entries_ctl( $check_val, $attrs, $post_types = array() ) {
 			global $wpdb;
 			$posttypes = array();
 			$posttypes['nav_menu_item'] = __( 'Menu', IGPBL );
-			$posttypes = array_merge( $posttypes, self::get_post_types() );
+			$posttypes = ! $post_types ? array_merge( $posttypes, self::get_post_types() ) : $post_types;
 			$post_singles = $arr_post_has_parent = array();
 			// Check taxonomies is parent type
 			$exclude_taxo = self::_get_exclude_taxonomies();
 			$public_taxs  = self::get_public_taxonomies( true );
+			$term_taxos = self::get_term_taxonomies( '', true, 'name' );
 
 			foreach ( $posttypes as $slug => $name ) {
 				if ( ! isset( $post_singles[$slug] ) ) {
@@ -765,6 +766,7 @@ if ( ! class_exists( 'IG_Pb_Helper_Type' ) ) {
 						$post_id = get_the_ID();
 						$arr_posts[$post_id] = __( get_the_title(), IGPBL );
 					}
+					
 					wp_reset_postdata();
 				}
 
@@ -774,7 +776,7 @@ if ( ! class_exists( 'IG_Pb_Helper_Type' ) ) {
 						$arr_post_ids[] = $id;
 					}
 				}
-
+				
 				$arr_post_ids	= implode( ',', $arr_post_ids );
 				if ( $arr_post_ids ) {
 					$sql = $wpdb->prepare(
@@ -813,6 +815,13 @@ if ( ! class_exists( 'IG_Pb_Helper_Type' ) ) {
 									if ( ! in_array( $slug, $arr_post_has_parent ) ) {
 										$arr_post_has_parent[] = $slug;
 									}
+									
+									$arr_cats = isset( $term_taxos[$taxonomy] ) ? (array) $term_taxos[$taxonomy] : array();
+									foreach ( $arr_cats as $i => $cat ) {
+										if ( $cat ) {
+											$post_singles[$slug][$i] = $cat;
+										}
+									}
 								}
 							}
 							foreach ( $result as $i => $item ) {
@@ -828,6 +837,7 @@ if ( ! class_exists( 'IG_Pb_Helper_Type' ) ) {
 							}
 							unset( $arr_taxonomy[$j] );
 						}
+						
 					} else {
 						foreach ( $arr_posts as $id => $title ) {
 							foreach ( $result as $i => $item ) {
@@ -845,14 +855,14 @@ if ( ! class_exists( 'IG_Pb_Helper_Type' ) ) {
 			}
 
 			$result     = array();
-			$term_taxos = self::get_term_taxonomies( '', true, 'name' );
+
 			foreach ( $posttypes as $_slug => $post ) {
 				if ( in_array( $_slug, $exclude_taxo ) OR in_array( $_slug, $arr_post_has_parent ) ) {
 					unset( $posttypes[$_slug] );
 				}
 			}
-
-			foreach ( array_merge( $post_singles, $term_taxos ) as $taxo => $terms ) {
+			
+			foreach ( $post_singles as $taxo => $terms ) {
 				$tmp_arr = array();
 				if ( ! in_array( $taxo , $exclude_taxo ) ) {
 					$tmp_arr['multiple'] = '1';
@@ -1195,6 +1205,40 @@ if ( ! class_exists( 'IG_Pb_Helper_Type' ) ) {
 				'checkbox' 	=> __( 'Yes / No', IGPBL )
 			);
 		}
+
+        /**
+         * Get posts by Term ID
+         *
+         * @param type $item_filter
+         * @param type $arr_ids
+         * @param type $source
+         */
+        static function post_by_termid($item_filter, &$arr_ids, &$source) {
+            global $wpdb;
+            // Get list of Post ID by filter criteria
+            $sql     = $wpdb->prepare(
+                "SELECT DISTINCT(object_id), term_taxonomy_id
+                FROM $wpdb->term_relationships AS term_rel
+                WHERE term_rel.term_taxonomy_id IN ( %s )",
+                $item_filter
+            );
+            $objlist = $wpdb->get_results( $sql );
+
+            foreach ( $objlist as $i => $item ) {
+                $arr_ids[] = $item->object_id;
+                // get taxonomy
+                $sqlx      = $wpdb->prepare(
+                    "SELECT *
+                    FROM $wpdb->term_taxonomy
+                    WHERE term_taxonomy_id = %d",
+                    $item->term_taxonomy_id
+                );
+                $datax = $wpdb->get_results( $sqlx );
+                foreach ( $datax as $i => $itemx ) {
+                    $source[] = $itemx->taxonomy;
+                }
+            }
+        }
 
 	}
 

@@ -20,12 +20,24 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 		$this->config['el_type'] = 'element';
 
 		$this->element_config();
+
+		// add shortcode
+		add_shortcode( $this->config['shortcode'], array( &$this, 'element_shortcode' ) );
+
+	}
+
+	/**
+	 * Method to call neccessary functions for initialyzing the backend
+	 */
+	public function init_element()
+	{
 		$this->element_items();
 		$this->element_items_extra();
 		$this->shortcode_data();
 
-		// add shortcode
-		add_shortcode( $this->config['shortcode'], array( &$this, 'element_shortcode' ) );
+		do_action( 'ig_pb_element_init' );
+
+		parent::__construct();
 
 		// enqueue assets for current element in backend (modal setting iframe)
 		if ( IG_Pb_Helper_Functions::is_modal_of_element( $this->config['shortcode'] ) ) {
@@ -36,39 +48,6 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 		if ( IG_Pb_Helper_Functions::is_preview() ) {
 			add_action( 'pb_admin_enqueue_scripts', array( &$this, 'enqueue_assets_frontend' ) );
 		}
-
-		do_action( 'ig_pb_element_init' );
-
-		$prefix = IG_Pb_Helper_Functions::is_preview() ? 'pb_admin' : 'wp';
-
-		// enqueue custom assets at footer of frontend/backend
-		add_action( "{$prefix}_footer", array( &$this, 'custom_assets_frontend' ) );
-
-		// Register required assets
-		add_filter( 'ig-edit-element-required-assets', array( &$this, 'required_assets' ) );
-	}
-
-	/**
-	 * Define required assets for shortcode settings form.
-	 *
-	 * @param   array  $assets  Current required assets.
-	 *
-	 * @return  array
-	 */
-	public function required_assets( $assets ) {
-		if ( ! isset( $_GET['ig_shortcode_preview'] ) || ! $_GET['ig_shortcode_preview'] ) {
-			// Register admin assets if required
-			if ( @is_array( $this->config['exception'] ) && isset( $this->config['exception']['admin_assets'] ) ) {
-				$assets[] = $this->config['exception']['admin_assets'];
-			}
-		} else {
-			// Register front-end assets if required
-			if ( @is_array( $this->config['exception'] ) && isset( $this->config['exception']['frontend_assets'] ) ) {
-				$assets[] = $this->config['exception']['frontend_assets'];
-			}
-		}
-
-		return $assets;
 	}
 
 	/**
@@ -124,7 +103,7 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 		);
 
 		// if not child element
-		if( strpos( $shotcode_name, 'item_' ) === false ) {
+		if ( strpos( $shotcode_name, 'item_' ) === false ) {
 			$css_suffix = array(
 				'name'    => __( 'CSS Class', IGPBL ),
 				'id'      => 'css_suffix',
@@ -193,10 +172,16 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 	 * @param string $content
 	 * @param string $shortcode_data: string stores params (which is modified default value) of shortcode
 	 * @param string $el_title: Element Title used to identifying elements in IG PageBuilder
+	 * @param int $index
+	 * @param bool $inlude_sc_structure
+	 * @param array $extra_params
 	 * Ex:  param-tag=h6&param-text=Your+heading&param-font=custom&param-font-family=arial
 	 * @return string
 	 */
-	public function element_in_pgbldr( $content = '', $shortcode_data = '', $el_title = '', $index = '' ) {
+	public function element_in_pgbldr( $content = '', $shortcode_data = '', $el_title = '', $index = '', $inlude_sc_structure = true, $extra_params = array() ) {
+		// Init neccessary data to render element in backend.
+		$this->init_element();
+
 		$shortcode		  = $this->config['shortcode'];
 		$is_sub_element   = ( isset( $this->config['sub_element'] ) ) ? true : false;
 		$parent_shortcode = ( $is_sub_element ) ? str_replace( 'ig_item_', '', $shortcode ) : $shortcode;
@@ -255,11 +240,13 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 		$content_class   = ( $is_sub_element ) ? 'jsn-item-content' : 'ig-pb-element';
 		$modal_title     = empty ( $modal_title ) ? ( ! empty( $exception['data-modal-title'] ) ? "data-modal-title='{$exception['data-modal-title']}'" : '' ) : $modal_title;
 		$element_type    = "data-el-type='$type'";
+		$edit_using_ajax = ! empty( $exception['edit_using_ajax'] ) ? sprintf( "data-using-ajax='%s'", esc_attr( $exception['edit_using_ajax'] ) ) : '';
 
 		$data = array(
 			'element_wrapper' => $element_wrapper,
 			'modal_title' => $modal_title,
 			'element_type' => $element_type,
+			'edit_using_ajax' => $edit_using_ajax,
 			'name' => $name,
 			'shortcode' => $shortcode,
 			'shortcode_data' => $shortcode_data,
@@ -267,6 +254,10 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 			'content' => $content,
 			'action_btn' => empty( $exception['action_btn'] ) ? '' : $exception['action_btn'],
 		);
+		// Merge extra params if it exists.
+		if ( ! empty( $extra_params ) ) {
+			$data = array_merge( $data, $extra_params );
+		}
 		$extra = array();
 		if ( isset( $this->config['exception']['disable_preview_container'] ) ) {
 			$extra = array(
@@ -274,7 +265,7 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 			);
 		}
 		$data = array_merge( $data, $extra );
-		$html_preview = IG_Pb_Helper_Functions::get_element_item_html( $data );
+		$html_preview = IG_Pb_Helper_Functions::get_element_item_html( $data, $inlude_sc_structure );
 		return array(
 			$html_preview
 		);
@@ -297,6 +288,13 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 	 * @param string $content
 	 */
 	public function element_shortcode( $atts = null, $content = null ) {
+		$this->init_element();
+
+		$prefix = IG_Pb_Helper_Functions::is_preview() ? 'pb_admin' : 'wp';
+
+		// enqueue custom assets at footer of frontend/backend
+		add_action( "{$prefix}_footer", array( &$this, 'custom_assets_frontend' ) );
+
 		$arr_params = ( shortcode_atts( $this->config['params'], $atts ) );
 		if ( $arr_params['disabled_el'] == 'yes' ) {
 			if ( IG_Pb_Helper_Functions::is_preview() ) {
@@ -335,12 +333,13 @@ class IG_Pb_Shortcode_Element extends IG_Pb_Shortcode_Common {
 			$style = "style='$style $custom_style'";
 		}
 
-		$class        = "ig-element-container ig-element-$shortcode_name";
+		$class        = "jsn-bootstrap3 ig-element-container ig-element-$shortcode_name";
 		$extra_class .= ! empty ( $arr_params['css_suffix'] ) ? ' ' . esc_attr( $arr_params['css_suffix'] ) : '';
 		$class       .= ! empty ( $extra_class ) ? ' ' . ltrim( $extra_class, ' ' ) : '';
 		$extra_id     = ! empty ( $arr_params['id_wrapper'] ) ? ' ' . esc_attr( $arr_params['id_wrapper'] ) : '';
 		$extra_id     = ! empty ( $extra_id ) ? "id='" . ltrim( $extra_id, ' ' ) . "'" : '';
-		return "<div $extra_id class='$class' $style>" . $html_element . '</div>';
+		//return "<div $extra_id class='$class' $style>" . $html_element . '</div>';
+        return $html_element;
 	}
 
 	/**

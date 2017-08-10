@@ -16,7 +16,9 @@
 	"use strict";
 
 	$(document).ready(function () {
-
+		$('body').on("click", ".ig-dialog .radio_image", function (e) {
+			e.stopPropagation();
+		});
 
         // toggle Position box
         $('#param-background').change(function(){

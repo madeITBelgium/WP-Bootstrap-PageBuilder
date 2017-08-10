@@ -28,45 +28,45 @@ wp_nonce_field( 'ig_builder', IGNONCE . '_builder' );
 	</div>
 
 	<!-- Page Templates -->
-    <div class="pull-right" id="top-btn-actions">
-        <div class="pull-left" id="page-custom-css">
-            <button class="btn btn-default" onclick="return false;"><?php _e( 'Custom CSS', IGPBL ) ?></button>
-        </div>
-    	<div class="btn-group dropdown" id="page-template">
-    		<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
-			<?php _e( 'Page template', IGPBL ) ?>
-			<span class="caret"></span>
+	<div class="pull-right" id="top-btn-actions">
+		<div class="pull-left" id="page-custom-css">
+			<button class="btn btn-default" onclick="return false;"><?php _e( 'Custom CSS', IGPBL ) ?></button>
+		</div>
+		<div class="btn-group dropdown pull-left" id="page-template">
+			<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+				<?php _e( 'Page template', IGPBL ) ?>
+				<span class="caret"></span>
 			</a>
 			<ul class="dropdown-menu pull-right">
-		    	<li><a href="#" id="save-as-new" data-toggle="modal"><?php _e( 'Save as new template', IGPBL ); ?></a></li>
-		    	<li><a  id="apply-page" href="#"><?php _e( 'Load template', IGPBL ); ?></a></li>
-		    </ul>
-	    </div>
-    </div>
+				<li><a href="#" id="save-as-new" data-toggle="modal"><?php _e( 'Save as new template', IGPBL ); ?></a></li>
+				<li><a  id="apply-page" href="#"><?php _e( 'Load template', IGPBL ); ?></a></li>
+			</ul>
+		</div>		
+	</div>
 
-    <!-- Save as new template modal -->
-    <div id="save-as-new-dialog" role="dialog" aria-hidden="true" tabindex="-1" >
-     	<div class="modal-dialog">
-	     	<div class="modal-content">
-		    	<div class="modal-header ui-dialog-title">
+	<!-- Save as new template modal -->
+	<div id="save-as-new-dialog" role="dialog" aria-hidden="true" tabindex="-1" >
+	 	<div class="modal-dialog">
+		 	<div class="modal-content">
+				<div class="modal-header ui-dialog-title">
 				<h3><?php _e( 'Save as new template', IGPBL ); ?></h3>
 				</div>
-		    	<div class="modal-body form-horizontal">
-			    	<div class="form-group">
+				<div class="modal-body form-horizontal">
+					<div class="form-group">
 						<label class="col-xs-3 control-label" for="template-name"><?php _e( 'Template name:' );?></label>
 						<div class="controls col-xs-9">
 							<input type="text" id="template-name" class="input form-control">
 						</div>
-			    	</div>
-		    	</div>
-		    	<div class="modal-footer">
+					</div>
+				</div>
+				<div class="modal-footer">
 					<a href="#" class="btn btn-primary template-save"><?php _e( 'Save', IGPBL ); ?></a>
 					<a href="#" class="btn template-cancel"><?php _e( 'Cancel', IGPBL ); ?></a>
 				</div>
 			</div>
 		</div>
-    </div>
-    <!-- END Save as new template modal -->
+	</div>
+	<!-- END Save as new template modal -->	
 </div>
 
 <!-- IG PageBuilder elements -->
@@ -84,7 +84,6 @@ if ( ! empty( $pagebuilder_content ) ) {
 
 		<a href="javascript:void(0);" id="jsn-add-container" class="jsn-add-more"><i class="icon-plus"></i><?php _e( 'Add Row', IGPBL ) ?></a>
 		<input type="hidden" id="ig-select-media" value="" />
-		<input type="hidden" id="ig-tinymce-change" value="0" />
 	</div>
 	<div id="deactivate-msg" class="jsn-section-empty hidden">
 		<p class="jsn-bglabel">
@@ -98,19 +97,6 @@ if ( ! empty( $pagebuilder_content ) ) {
 	</div>
 </div>
 
-<!-- Link to website -->
-<div id="branding">
-	<div class="pull-left">
-		<a href="http://www.innogears.com/wordpress-plugins/ig-pagebuilder-on-wporg.html"><?php _e( 'PageBuilder', IGPBL ); ?></a> <?php _e( 'by', IGPBL )?> <a href="http://www.innogears.com" target="_blank">InnoGears.com</a>
-	</div>
-	<div class="pull-right">
-		<a href="http://www.innogears.com/wordpress-plugins/ig-pagebuilder-docs.html"><?php _e( 'Documentation', IGPBL ); ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;
-		<a href="http://www.innogears.com/wordpress-plugins/ig-pagebuilder-support.html" target="_blank"><?php _e( 'Support', IGPBL ); ?></a>&nbsp;&nbsp;|&nbsp;&nbsp;
-		<a href="http://www.innogears.com/wordpress-plugins/ig-pagebuilder-review.html" target="_blank"><?php _e( 'Review', IGPBL ); ?></a>
-	</div>
-	<div class="clearbreak"></div>
-</div>
-
 <?php
 // Select Element Popover
 include 'select-elements.php';
@@ -122,13 +108,13 @@ include 'layout/template.php';
 global $post;
 ?>
 <div id="ig-pb-css-value">
-    <input type="hidden" name="ig_pb_post_id" value="<?php echo esc_attr( isset ( $post->ID ) ? $post->ID : '' ); ?>">
+	<input type="hidden" name="ig_pb_post_id" value="<?php echo esc_attr( isset ( $post->ID ) ? $post->ID : '' ); ?>">
 </div>
 
 <!--[if IE]>
 <style>
-    #jsn-quicksearch-field{
-        height: 28px;
-    }
+	.jsn-quicksearch-field{
+		height: 28px;
+	}
 </style>
 <![endif]-->

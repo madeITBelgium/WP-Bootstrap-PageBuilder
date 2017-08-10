@@ -1,28 +1,24 @@
 === IG Page Builder ===
-Contributors: Made I.T.
-Tags: page builder, bootstrap
-Requires at least: 4.5
-Tested up to: 4.8
-Stable tag: 1.0
+Contributors: innogears
+Tags: page builder, admin, content, visual, element, plugin, advanced, page elements, editor, layout, easy to use, page, post, responsive, widget
+Requires at least: 3.8
+Tested up to: 3.9
+Stable tag: 3.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-A simple powerful bootsrap page builder that lets you create a complete WordPress website in just a few minutes
+A simple yet powerful page builder that lets you create a complete WordPress website in just a few minutes
 
 == Description ==
 
-Bootstrap Page Builder is an easy-to-use page builder that helps you quickly build a complete WordPress website and you don't even need to read any documentation.
+[vimeo https://vimeo.com/88215863]
 
+This is a drag-n-drop page builder which is similar to an advanced visual editor and can use for any theme. IG Page Builder is an easy-to-use page builder that helps you quickly build a complete WordPress website and you don't even need to read any documentation.
 
-This is a drag-n-drop page builder which is similar to an advanced visual editor and can use for any theme.
+What makes IG Page Builder stand-out from others is focusing on simplicity, lightweight and really useful, so that making your own unique website becomes easier than ever.
 
-What makes Bootstrap Page Builder stand-out from others is focusing on simplicity, lightweight and really useful, so that making your own unique website becomes easier than ever.
-
-In order to offer the easiest way to build a website, Bootstrap Page Builder includes full page elements (built-in shortcodes) for a fully functional website. Besides, it also totally supports adding any widget and many options for deeper customization, so there is no need to touch any code. All the elements are specifically designed with 2 configuration sections: one tab for building content and the other for taking a visual look of what you are doing without having to go back into the front-end.
-
-In addition, the page builder is equipped fully responsive functionality; your site will automatically adjust its layout and look more fantastic on whatever devices which your customers are using.
-
-You can constantly use this page builder as a starter tool for your website building project. With Bootstrap PageBuilder, nothing is impossible.
+* <a href="http://demo.innogears.com/ig-pagebuilder">Live Demo</a>
+* <a href="http://www.innogears.com/docs/ig-pagebuilder">Documentation</a>
 
 <h4>Main Features:</h4>
 
@@ -38,24 +34,44 @@ You can constantly use this page builder as a starter tool for your website buil
 * Support many advanced page elements
 * Support resizing blocks using only a mouse
 
-<h4>Extend Bootstrap PageBuilder with powerful add-ons</h4>
+<h4>Extend IG PageBuilder with powerful add-ons</h4>
+
+* <a href="http://www.innogears.com/addons.html">Pro Page Elements</a>
+
+<h4>Contribute to the project</h4>
+
+Are you a developer and interested in IG PageBuilder? Please join and collaborate with us on <a href="https://github.com/wp-plugins/ig-pagebuilder">Github Repo</a>!
+
+<i>*If you like the plugin, please vote for it!*</i>
 
 == Installation ==
-1. Upload Bootstrap Page Builder to the /wp-content/plugins/ directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
+1. Upload IG Page Builder to the /wp-content/plugins/ directory
+2. Activate the plugin through the \\\\\\\'Plugins\\\\\\\' menu in WordPress
 
 
 == Screenshots ==
 
-1. The Bootstrap Page Builder layout
+1. The IG Page Builder layout
 2. Live Preview
 3. Widget Window
 
 == More Details ==
 
-For further information, product details, help and tutorials, please visit our website: http://www.madeit.be
+For further information, product details, help and tutorials, please visit our website: http://www.innogears.com/
 
 == Changelog ==
+
+= 2.3.0 =
+* Added Undo/Redo feature
+* Added new parameters for Youtube element
+* Improved backend Drag & Drop and Editing experience
+* Improved working performance
+* Improved frontend assets loading mechanism
+* Improved element HTML template pre-generating in backend
+* Fixed can not save the content from classic editor with the page/post built from PageBuilder
+* Fixed can not save options in setting Modal of Rss Widget
+* Fixed empty black box rendered when Carousel element contains only image but no title and description
+* Fixed wrong select2 z-index
 
 = 2.2.1 =
 * Fixed Modal and select box z-index
@@ -81,10 +97,10 @@ For further information, product details, help and tutorials, please visit our w
 * Added Setting page for IG PageBuilder
 * Added Options to handle IG Cache
 * Added Premade Template feature
-* Added Class suffix to row and elementï¿½s wrapper
+* Added Class suffix to row and element’s wrapper
 * Fixed table colspan problem
 * Fixed Css overriding bugs
-* Fixed elementsï¿½ displaying bugs
+* Fixed elements’ displaying bugs
 * Fixed Assets enqueue error
 
 = 1.0.9 =
@@ -93,9 +109,9 @@ For further information, product details, help and tutorials, please visit our w
 = 1.0.8 =
 * Fixed Carousel background
 * Fixed Full mode pagebuilder status
-* Fixed Bootstrap conflicts with themeï¿½s css
+* Fixed Bootstrap conflicts with theme’s css
 * Fixed Readmore button not showed
-* Improved Allow itemï¿½s heading to be nullable
+* Improved Allow item’s heading to be nullable
 
 = 1.0.7 =
 * Fixed Tab position not working
@@ -114,7 +130,7 @@ For further information, product details, help and tutorials, please visit our w
 = 1.0.4 =
 * Added ability to disable an element on frontend
 * Improved Editor switching feature
-* Improved Element setting pageï¿½s speed
+* Improved Element setting page’s speed
 * Fixed Minor bugs
 
 = 1.0.3 =

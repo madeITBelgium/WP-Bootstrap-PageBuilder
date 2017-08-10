@@ -22,7 +22,7 @@ class IG_Pb_Helper_Html_Icons extends IG_Pb_Helper_Html {
 			<input type='hidden' value='{$element['std']}' id='{$element['id']}' name='{$element['id']}'  DATA_INFO />
 		</div>";
 
-		add_filter( 'ig_pb_assets_enqueue_modal', array( __CLASS__, 'enqueue_assets_modal' ) );
+		add_filter( 'ig-edit-element-required-assets', array( __CLASS__, 'enqueue_assets_modal' ), 0 );
 
 		return parent::final_element( $element, $output, $label );
 	}

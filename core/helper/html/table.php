@@ -20,12 +20,18 @@ class IG_Pb_Helper_Html_Table extends IG_Pb_Helper_Html {
 		$sub_items     = $element['sub_items'];
 		$sub_item_type = $element['sub_item_type'];
 		$items_html    = array();
+		$sample_table_item = '';
 
 		// Get HTML of Each Cell
 		$shortcode_data_arr = array();
+		// Add extra params to disable drag handle
+		$extra_params = array(
+			'drag_handle' => false
+		);
 
 		foreach ( $sub_items as $idx => $item ) {
 			$element_ = new $sub_item_type();
+			$element_->init_element();
 			$shortcode_data = '';
 			$content = '&nbsp;'; // don't leave it empty
 			if ( ! empty( $item['std'] ) ) {
@@ -41,8 +47,13 @@ class IG_Pb_Helper_Html_Table extends IG_Pb_Helper_Html {
 				}
 				$shortcode_data_arr[$idx] = $shortcode_data;
 			}
-
-			$element_type = $element_->element_in_pgbldr( $content, $shortcode_data );
+			$element_type = $element_->element_in_pgbldr( $content, $shortcode_data, '', '', true, $extra_params );
+			
+			// Create sample table item data
+			if ( ! $sample_table_item ) {
+				$sample_table_item = $element_->element_in_pgbldr( null, null, '', '', true, $extra_params );
+			}
+			
 			foreach ( $element_type as $element_structure ) {
 				$items_html[] = $element_structure;
 			}
@@ -96,6 +107,9 @@ class IG_Pb_Helper_Html_Table extends IG_Pb_Helper_Html {
 							$items_html
 						</div>
 					</div>";
+		$sample_tmpl_id = strtolower( $sub_item_type );
+		$output .= ( isset( $sample_table_item[0] ) ) ? "<script id='tmpl-" . $sample_tmpl_id . "-sample' type='text/html'>" . $sample_table_item[0] . "</script>" : '';
+		
 		return parent::final_element( $element, $output, $label );
 	}
 }

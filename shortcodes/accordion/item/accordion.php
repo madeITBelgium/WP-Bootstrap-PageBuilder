@@ -29,7 +29,8 @@ if ( ! class_exists( 'IG_Item_Accordion' ) ) {
 		public function element_config() {
 			$this->config['shortcode'] = strtolower( __CLASS__ );
 			$this->config['exception'] = array(
-				'data-modal-title' => __( 'Accordion Item', IGPBL )
+				'data-modal-title' => __( 'Accordion Item', IGPBL ),
+
 			);
 		}
 

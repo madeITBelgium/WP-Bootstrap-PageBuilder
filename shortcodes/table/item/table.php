@@ -13,7 +13,7 @@ if ( ! class_exists( 'IG_Item_Table' ) ) {
 
 	/**
 	 * Create Table child element
-	 * 
+	 *
 	 * @package  IG PageBuilder Shortcodes
 	 * @since    1.0.0
 	 */
@@ -33,6 +33,11 @@ if ( ! class_exists( 'IG_Item_Table' ) ) {
 				'data-modal-title' => __( 'Table Item', IGPBL ),
 				'item_wrapper'     => 'div',
 				'action_btn'       => 'edit',
+
+				'admin_assets' => array(
+					// Shortcode initialization
+					'item_table.js',
+				),
 			);
 		}
 

@@ -45,7 +45,7 @@ class IG_Pb_Product_Plugin {
 		// Generate menu title
 		$menu_title = __( 'IG PageBuilder', IGPBL );
 
-		if ( $plugin['Available_Update'] && ( 'admin.php' != $pagenow || ! isset( $_GET['page'] ) || ! in_array( $_GET['page'], self::$pages ) ) ) {
+		if ( $plugin['Available_Update'] && ( 'admin.php' != $pagenow || ! isset( $_REQUEST['page'] ) || ! in_array( $_REQUEST['page'], self::$pages ) ) ) {
 			$menu_title .= " <span class='ig-available-updates update-plugins count-{$plugin['Available_Update']}'><span class='pending-count'>{$plugin['Available_Update']}</span></span>";
 		}
 
@@ -72,7 +72,7 @@ class IG_Pb_Product_Plugin {
 			// Generate menu title
 			$menu_title = __( 'Add-ons', IGPBL );
 
-			if ( $plugin['Available_Update'] && ( 'admin.php' == $pagenow && isset( $_GET['page'] ) && in_array( $_GET['page'], self::$pages ) ) ) {
+			if ( $plugin['Available_Update'] && ( 'admin.php' == $pagenow && isset( $_REQUEST['page'] ) && in_array( $_REQUEST['page'], self::$pages ) ) ) {
 				$menu_title .= " <span class='ig-available-updates update-plugins count-{$plugin['Available_Update']}'><span class='pending-count'>{$plugin['Available_Update']}</span></span>";
 			}
 
@@ -94,17 +94,53 @@ class IG_Pb_Product_Plugin {
 		IG_Init_Admin_Menu::add( $admin_menus );
 
 		// Load required assets
-		if ( 'admin.php' == $pagenow && isset( $_GET['page'] ) && in_array( $_GET['page'], array( 'ig-pb-settings', 'ig-pb-addons' ) ) ) {
+		if ( 'admin.php' == $pagenow && isset( $_REQUEST['page'] ) && in_array( $_REQUEST['page'], array( 'ig-pb-settings', 'ig-pb-addons' ) ) ) {
 			// Load common assets
 			IG_Init_Assets::load( array( 'ig-bootstrap-css', 'ig-jsn-css' ) );
 
-			switch ( $_GET['page'] ) {
+			switch ( $_REQUEST['page'] ) {
 				case 'ig-pb-addons':
 					// Load addons style and script
 					IG_Init_Assets::load( array( 'ig-addons-css', 'ig-addons-js' ) );
 				break;
 			}
 		}
+
+		// Register Ajax actions
+		if ( 'admin-ajax.php' == $pagenow ) {
+			add_action( 'wp_ajax_ig-pb-convert-data',  array( __CLASS__, 'convert_data' ) );
+		}
+	}
+
+	/**
+	 * Convert other page builder data to IG PageBuilder data.
+	 *
+	 * @return  void
+	 */
+	public static function convert_data() {
+		// Get current post
+		$post = isset( $_REQUEST['post'] ) ? get_post( $_REQUEST['post'] ) : null;
+
+		if ( ! $post ) {
+			die( json_encode( array( 'success' => false, 'message' => __( 'Missing post ID.', IGPBL ) ) ) );
+		}
+
+		// Get converter
+		$converter = isset( $_REQUEST['converter'] ) ? IG_Pb_Converter::get_converter( $_REQUEST['converter'], $post ) : null;
+
+		if ( ! $converter ) {
+			die( json_encode( array( 'success' => false, 'message' => __( 'Missing data converter.', IGPBL ) ) ) );
+		}
+
+		// Handle conversion of other page builder data to IG PageBuilder
+		$result   = $converter->convert();
+		$response = array( 'success' => true, 'message' => $result );
+
+		if ( ! is_integer( $result ) || ! $result ) {
+			$response = array( 'success' => false, 'message' => $result );
+		}
+
+		die( json_encode( $response ) );
 	}
 
 	/**

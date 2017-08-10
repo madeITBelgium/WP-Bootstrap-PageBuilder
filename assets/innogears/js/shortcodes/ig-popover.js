@@ -39,7 +39,7 @@
                 this_.openActionSettings(this_, $(this));
 
                 // Remove old select2 in Popover before re-initialize
-                $('#modalAction').find('.select2-container').remove();
+                $('.jsn-modal:last #modalAction').find('.select2-container').remove();
 
                 // Remove select2 drop mask
                 $('#select2-drop-mask').remove();
@@ -177,7 +177,7 @@
                 }
 
                 dialog.hide();
-                dialog.appendTo('#modalAction');
+                dialog.appendTo('.jsn-modal:last #modalAction');
             }
 
             dialog.fadeIn(500);
@@ -197,6 +197,7 @@
                 position.top -= dialog_wrapper_pos.offset.top + 40;
                 $('.jsn-bootstrap3 .popover.left > .arrow').css('left', 'auto');
             }
+            position.top += $('.ui-dialog-content').scrollTop();
 
             // Update position for popover
             dialog.css(position);

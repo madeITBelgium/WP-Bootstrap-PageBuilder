@@ -72,7 +72,7 @@ jQuery( function ($){
 	        }
 			obj.parent().addClass('input-append');
 
-			obj.after($('<span class="add-on"></span'));
+			obj.after($('<span class="add-on input-group-addon"></span'));
 			var loading_icon	= $('<i class="audio-validate jsn-icon16 jsn-icon-loading" ></i>');
 			var ok_icon			= $('<i class="audio-validate icon-ok" ></i>');
 			var ban_icon		= $('<i class="audio-validate icon-warning" data-original-title="'+Ig_Translate.invalid_link+'"></i>');

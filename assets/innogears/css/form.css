@@ -31,7 +31,7 @@
 	bottom: 0;
 	left: 0;
 	min-height: 32px;
-	background: rgba(255,255,255,.25) url(../../3rd-party/jsn/images/icons-32/icon-32-loading-circle.gif) 50% 50% no-repeat !important;
+	background: rgba(255,255,255,.25) url(../../3rd-party/bs2/jsn/images/icons-32/icon-32-loading-circle.gif) 50% 50% no-repeat !important;
 }
 
 /* Tabs */

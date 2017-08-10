@@ -112,10 +112,14 @@
                         layout_content	: layout_content,
                         ig_nonce_check  : Ig_Ajax._nonce
                     },
-                    function() {
-                        var message = parent.find('.layout-message');
-                        var action_btn = parent.find('.layout-action');
-                        layout_callback_fn(loading, message, '' , action_btn);
+                    function(response) {
+                    	if ( response == 'error' ) {
+                    		alert( Ig_Translate.layout.name_exist );
+                    	} else {
+                    		var message = parent.find('.layout-message');
+                            var action_btn = parent.find('.layout-action');
+                            layout_callback_fn(loading, message, '' , action_btn);
+                    	}
                     }
                 );
             });

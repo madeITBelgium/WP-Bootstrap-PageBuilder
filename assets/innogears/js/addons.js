@@ -219,7 +219,7 @@
 								addon.attr('data-action', 'uninstall').html(self.lang.UNINSTALL);
 
 								// Append `Installed` sticker
-								addon.closest('li').children('img').after('<span class="label label-success">' + self.lang.INSTALLED + '</span>');
+								addon.closest('li').append('<span class="label label-success">' + self.lang.INSTALLED + '</span>');
 							break;
 
 							case 'uninstall':
@@ -227,7 +227,7 @@
 								addon.addClass('btn-primary').attr('data-action', 'install').html(self.lang.INSTALL);
 
 								// Remove `Installed` sticker
-								addon.closest('li').children('img').next('.label-success').remove();
+								addon.closest('li').find('.label-success').remove();
 
 								// Remove `Update` button
 								addon.parent().children('a[data-action="update"]').remove();
@@ -313,7 +313,7 @@
 						}
 
 						// Append `Incompatible` sticker
-						addon.closest('li').children('img').after('<span class="label label-danger">' + self.lang.INCOMPATIBLE + '</span>');
+						addon.closest('li').append('<span class="label label-danger">' + self.lang.INCOMPATIBLE + '</span>');
 
 						// Show error message
 						alert(data.message.replace('%s', addon_name));

@@ -25,7 +25,7 @@ class IG_Pb_Utils_Common {
 		}
 		global $wpdb;
 		$keys  = implode( ', ', $keys );
-		$extra = ! empty ( $post_id ) ? 'post_id = ' . mysql_real_escape_string( $post_id ) . ' AND' : '';
+		$extra = ! empty ( $post_id ) ? 'post_id = ' . esc_sql( $post_id ) . ' AND' : '';
 		$wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE $extra meta_key IN (%s)", $keys ) );
 	}
 

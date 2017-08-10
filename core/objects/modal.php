@@ -31,6 +31,8 @@ if ( ! class_exists( 'IG_Pb_Objects_Modal' ) ) {
 
 			// Localize script
 			$this->ig_localize();
+
+			do_action( 'ig_modal_init' );
 		}
 
 		/**
@@ -84,7 +86,7 @@ if ( ! class_exists( 'IG_Pb_Objects_Modal' ) ) {
 
 			IG_Pb_Helper_Functions::enqueue_scripts_end();
 
-			IG_Init_Assets::load( array( 'ig-pb-placeholder' , 'ig-pb-layout-js' ) );
+			IG_Init_Assets::load( array( 'ig-pb-placeholder' ) );
 		}
 
 		/**
@@ -198,7 +200,7 @@ if ( ! class_exists( 'IG_Pb_Objects_Modal' ) ) {
 			$i    = 0;
 			$tabs = $contents = $actions = $general_actions = array();
 
-			foreach ( $settings as $tab => $options ) {
+			foreach ( (array) $settings as $tab => $options ) {
 				$options = self::ignore_settings( $options );
 				if ( $tab == 'action' ) {
 					foreach ( $options as $option ) {

@@ -20,7 +20,6 @@ if ( ! isset( $_POST ) ) {
 }
 
 extract( $_POST );
-
 $submodal = ! empty( $submodal ) ? 'submodal_frame' : '';
 if ( ! isset( $params ) ) {
 	exit;
@@ -57,7 +56,6 @@ if ( ! empty( $shortcode ) ) {
 		$params = stripslashes( $params );
 		$params = urldecode( $params );
 	}
-
 	// elements
 	if ( $el_type == 'element' ) {
 
@@ -71,7 +69,15 @@ if ( ! empty( $shortcode ) ) {
 			if ( ! is_object( $instance ) ) {
 				$instance = new $class();
 			}
+			$instance->init_element();
+
+			// Generate default params if they were not posted.
+			if ( empty( $params ) ) {
+				$params  = $instance->config['shortcode_structure'];
+			}
+
 			if ( ! empty( $params ) ) {
+				$params = str_replace( '#_EDITTED', '', $params );
 				$extract_params = IG_Pb_Helper_Shortcode::extract_params( $params, $shortcode );
 
 				// if have sub-shortcode, extract sub shortcodes content
@@ -81,8 +87,10 @@ if ( ! empty( $shortcode ) ) {
 					$extract_params['sub_items_content'] = $sub_sc_data;
 				}
 
+				// Set auto title for the subitem if have
+				$extract_title   =( isset( $el_title ) && $el_title != __( '(Untitled)', IGPBL ) ) ? $el_title : '';
 				// MODIFY $instance->items
-				IG_Pb_Helper_Shortcode::generate_shortcode_params( $instance->items, NULL, $extract_params, TRUE );
+				IG_Pb_Helper_Shortcode::generate_shortcode_params( $instance->items, NULL, $extract_params, TRUE, FALSE, $extract_title );
 
 				// if have sub-shortcode, re-generate shortcode structure
 				if ( ! empty( $instance->config['has_subshortcode'] ) ) {
@@ -127,7 +135,7 @@ if ( ! empty( $shortcode ) ) {
 			// simplify widget field id
 			$exp  = preg_quote( $widget->get_field_id( '____' ) );
 			$exp  = str_replace( '____', '(.*? )', $exp );
-			$form = preg_replace( '/' . $exp . '/', 'param-$1', $form );
+			$form = preg_replace( '/' . $exp . '/', '$1', $form );
 
 			// tab and content generate
 			$tabs = array();
@@ -157,7 +165,7 @@ if ( ! empty( $shortcode ) ) {
 			<textarea class="hidden" id="ig_extract_data"></textarea>
 			<input type="hidden" id="ig_previewing" value="0" />
 			<input id="shortcode_type" type="hidden" value="<?php echo esc_attr( $el_type ); ?>" />
-			<input id="shortcode_name" type="hidden" value="<?php echo esc_attr( mysql_real_escape_string( $_GET['ig_modal_type'] ) ); ?>" />
+			<input id="shortcode_name" type="hidden" value="<?php echo esc_attr( esc_sql( $_GET['ig_modal_type'] ) ); ?>" />
 
 			<div class="jsn-modal-overlay"></div>
 			<div class="jsn-modal-indicator"></div>

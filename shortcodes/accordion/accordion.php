@@ -51,12 +51,12 @@ class IG_Accordion extends IG_Pb_Shortcode_Parent {
 				'ig-pb-font-icomoon-css',
 
 				// Load css front_end for this element.
-				'accordion_frontend.css'
+				'accordion_frontend.css',
 			),
 		);
 
-		// Do not use Ajax to load element settings modal because this element has sub-item
-		$this->config['edit_using_ajax'] = false;
+		// Use Ajax to speed up element settings modal loading speed
+		$this->config['edit_using_ajax'] = true;
 	}
 
 	/**
@@ -206,7 +206,7 @@ class IG_Accordion extends IG_Pb_Shortcode_Parent {
 		$filter_html = '';
 		if ( $filter == 'yes' ) {
 			$sub_sc_data = IG_Pb_Helper_Shortcode::extract_sub_shortcode( $content );
-            $sub_sc_data = reset($sub_sc_data);
+            $sub_sc_data = reset( $sub_sc_data );
 
             // tags to filter item
 			$tags = array( 'all' );

@@ -12,7 +12,7 @@
 if ( ! class_exists( 'IG_Item_Tab' ) ) {
 	/**
 	 * Create child Tab element
-	 * 
+	 *
 	 * @package  IG PageBuilder Shortcodes
 	 * @since    1.0.0
 	 */
@@ -28,7 +28,8 @@ if ( ! class_exists( 'IG_Item_Tab' ) ) {
 		public function element_config() {
 			$this->config['shortcode'] = strtolower( __CLASS__ );
 			$this->config['exception'] = array(
-				'data-modal-title' => __( 'Tab Item', IGPBL )
+				'data-modal-title' => __( 'Tab Item', IGPBL ),
+
 			);
 		}
 
@@ -79,7 +80,7 @@ if ( ! class_exists( 'IG_Item_Tab' ) ) {
 			extract( $arr_params );
 			$inner_content = IG_Pb_Helper_Shortcode::remove_autop( $content );
             $custom_style  = IG_Pb_Utils_Placeholder::get_placeholder( 'custom_style' );
-			return "$heading<!--heading-->$icon<!--icon--><div id='pane{index}' class='tab-pane {active} {fade_effect}' $custom_style>
+			return "$heading<!--heading-->$icon<!--icon--><div id='pane{index}' class='tab-pane {active} {fade_effect}'>
 					{$inner_content}
 				</div><!--seperate-->";
 		}

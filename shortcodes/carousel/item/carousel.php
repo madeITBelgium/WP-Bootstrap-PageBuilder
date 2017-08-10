@@ -10,7 +10,7 @@
  * Technical Support:  Feedback - http://www.innogears.com
  */
 if ( ! class_exists( 'IG_Item_Carousel' ) ) {
-	
+
 	/**
 	 * Create Carousel element
 	 *
@@ -29,7 +29,8 @@ if ( ! class_exists( 'IG_Item_Carousel' ) ) {
 		public function element_config() {
 			$this->config['shortcode'] = strtolower( __CLASS__ );
 			$this->config['exception'] = array(
-				'data-modal-title' => __( 'Carousel Item', IGPBL )
+				'data-modal-title' => __( 'Carousel Item', IGPBL ),
+
 			);
 		}
 
@@ -86,18 +87,24 @@ if ( ! class_exists( 'IG_Item_Carousel' ) ) {
 		public function element_shortcode_full( $atts = null, $content = null ) {
 			extract( shortcode_atts( $this->config['params'], $atts ) );
 			$content_class = ! empty( $image_file ) ? 'carousel-caption' : 'carousel-content';
-			$hidden        = ( empty( $heading ) && empty( $content) ) ? 'style="display:none"' : '';
 			$img           = ! empty( $image_file ) ? "<img src='$image_file' style='{HEIGHT}'>" : '';
+
+			// remove image shortcode in content
+			$content = IG_Pb_Helper_Shortcode::remove_ig_shortcodes( $content, 'ig_image' );
+
 			$inner_content = IG_Pb_Helper_Shortcode::remove_autop( $content );
             IG_Pb_Helper_Functions::heading_icon( $heading, $icon, true );
-			return "
-				<div class='{active} item'>
-					$img
-					<div class='$content_class' $hidden>
-						<h4><i class='$icon'></i>$heading</h4>
-						<p>{$inner_content}</p>
-					</div>
-				</div><!--seperate-->";
+
+            if ( empty( $heading ) && empty( $inner_content ) ) {
+            	$html_content = "";
+            } else {
+            	$html_content = "<div class='$content_class'>";
+            	$html_content .= ( ! empty( $heading ) ) ? "<h4><i class='$icon'></i>$heading</h4>" : '';
+            	$html_content .= ( ! empty( $inner_content ) ) ? "<p>{$inner_content}</p>" : '';
+            	$html_content .= "</div>";
+            }
+
+			return "<div class='{active} item'>{$img}{$html_content}</div><!--seperate-->";
 		}
 
 	}
